@@ -3,20 +3,20 @@ import { ArrowRight, Calendar } from "lucide-react";
 
 export default function Login() {
   return (
-    <div className="min-h-screen bg-[#FCFBF8] flex flex-col justify-center py-12 sm:px-6 lg:px-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <div className="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center">
         <Link to="/" className="flex items-center gap-2 mb-8">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "#C0987A" }}>
             <Calendar className="w-5 h-5 text-white" />
           </div>
-          <span className="text-[22px] font-bold tracking-tight text-[#2C2A29]" style={{ fontFamily: "'Fraunces', serif" }}>
+          <span className="text-[22px] font-bold tracking-tight text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
             Agenda Fácil
           </span>
         </Link>
-        <h2 className="mt-2 text-center text-3xl font-bold tracking-tight text-[#2C2A29]" style={{ fontFamily: "'Fraunces', serif" }}>
+        <h2 className="mt-2 text-center text-3xl font-bold tracking-tight text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
           Inicia sesión en tu cuenta
         </h2>
-        <p className="mt-2 text-center text-sm text-[#7E7870]">
+        <p className="mt-2 text-center text-sm text-muted-foreground">
           ¿O eres nuevo aquí?{" "}
           <Link to="/register" className="font-medium text-[#C0987A] hover:text-[#A9B3A2]">
             Crea tu agenda gratis
@@ -25,10 +25,10 @@ export default function Login() {
       </div>
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-black/5">
+        <div className="bg-card py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-border">
           <form className="space-y-6" action="#" method="POST">
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-[#4A4641]">
+              <label htmlFor="email" className="block text-sm font-medium text-foreground">
                 Correo electrónico
               </label>
               <div className="mt-1">
@@ -38,13 +38,13 @@ export default function Login() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="block w-full appearance-none rounded-xl border border-[#D1CEC4] px-3 py-2 placeholder-gray-400 shadow-sm focus:border-[#C0987A] focus:outline-none focus:ring-[#C0987A] sm:text-sm bg-[#F3EFE9]"
+                  className="block w-full appearance-none rounded-xl border border-border px-3 py-2 placeholder-muted-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-muted text-foreground"
                 />
               </div>
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-[#4A4641]">
+              <label htmlFor="password" className="block text-sm font-medium text-foreground">
                 Contraseña
               </label>
               <div className="mt-1">
@@ -54,7 +54,7 @@ export default function Login() {
                   type="password"
                   autoComplete="current-password"
                   required
-                  className="block w-full appearance-none rounded-xl border border-[#D1CEC4] px-3 py-2 placeholder-gray-400 shadow-sm focus:border-[#C0987A] focus:outline-none focus:ring-[#C0987A] sm:text-sm bg-[#F3EFE9]"
+                  className="block w-full appearance-none rounded-xl border border-border px-3 py-2 placeholder-muted-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-muted text-foreground"
                 />
               </div>
             </div>
@@ -67,7 +67,7 @@ export default function Login() {
                   type="checkbox"
                   className="h-4 w-4 rounded border-[#D1CEC4] text-[#C0987A] focus:ring-[#C0987A]"
                 />
-                <label htmlFor="remember-me" className="ml-2 block text-sm text-[#7E7870]">
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-muted-foreground">
                   Recordarme
                 </label>
               </div>

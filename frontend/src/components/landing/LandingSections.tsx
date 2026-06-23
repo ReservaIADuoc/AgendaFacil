@@ -11,26 +11,26 @@ const DARK = "#2C2A29";
 export function Hero() {
   const [currentProf, setCurrentProf] = useState(0);
   return (
-    <section className="relative overflow-hidden bg-[#FCFBF8] pt-16 pb-20 lg:pt-24 lg:pb-32">
+    <section className="relative overflow-hidden bg-background pt-16 pb-20 lg:pt-24 lg:pb-32">
       <div className="absolute top-0 right-0 w-[600px] h-[600px] rounded-full opacity-[0.05] blur-3xl -translate-y-1/3 translate-x-1/4" style={{ background: PRIMARY }} />
       <div className="absolute bottom-0 left-0 w-[400px] h-[400px] rounded-full opacity-[0.05] blur-3xl translate-y-1/3 -translate-x-1/4" style={{ background: ACCENT }} />
 
       <div className="relative max-w-6xl mx-auto px-5">
         <div className="grid lg:grid-cols-2 gap-12 lg:gap-16 items-center">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[12px] font-semibold mb-6 border-black/10 bg-black/[0.02]">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border text-[12px] font-semibold mb-6 border-border bg-muted text-foreground">
               <span className="w-2 h-2 rounded-full animate-pulse" style={{ background: PRIMARY }} />
               +10.000 profesionales confían en Agenda Fácil
             </div>
 
-            <h1 className="text-[42px] leading-[1.08] font-bold tracking-tight mb-6 lg:text-[52px]" style={{ color: DARK, fontFamily: "'Fraunces', serif" }}>
+            <h1 className="text-[42px] leading-[1.08] font-bold tracking-tight mb-6 lg:text-[52px] text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
               Tu agenda online,{" "}
               <em className="not-italic" style={{ color: PRIMARY }}>sin esfuerzo.</em>
               <br />Tu negocio,{" "}
               <span style={{ color: ACCENT }}>siempre lleno.</span>
             </h1>
 
-            <p className="text-[16px] text-gray-500 leading-relaxed mb-8 max-w-md" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <p className="text-[16px] text-muted-foreground leading-relaxed mb-8 max-w-md" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               Deja de perder citas por no contestar el teléfono. Agenda Fácil automatiza tu agenda, recuerda a tus clientes y llena tus huecos solo.
             </p>
 
@@ -59,7 +59,7 @@ export function Hero() {
                 Empieza gratis hoy
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
               </Link>
-              <button className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-[15px] font-semibold text-gray-700 border border-gray-200 bg-white hover:bg-gray-50 transition-all">
+              <button className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl text-[15px] font-semibold text-foreground border border-border bg-card hover:bg-muted transition-all">
                 <Play className="w-4 h-4" style={{ color: PRIMARY }} />
                 Ver demo
               </button>
@@ -77,7 +77,7 @@ export function Hero() {
                 <div className="flex gap-0.5 mb-0.5">
                   {[...Array(5)].map((_,i) => <Star key={i} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />)}
                 </div>
-                <p className="text-[12px] text-gray-500">4.9 de 5 · +800 reseñas</p>
+                <p className="text-[12px] text-muted-foreground">4.9 de 5 · +800 reseñas</p>
               </div>
             </div>
           </div>
@@ -102,16 +102,16 @@ export function TrustBar() {
     { icon: <TrendingUp className="w-4 h-4" style={{ color: PRIMARY }} />, value: "82%", label: "más citas al mes" },
   ];
   return (
-    <section className="border-y border-black/5 bg-gray-50/60">
+    <section className="border-y border-border bg-muted/30">
       <div className="max-w-6xl mx-auto px-5 py-8 grid grid-cols-2 lg:grid-cols-4 gap-6">
         {items.map(item => (
           <div key={item.label} className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shadow-sm border border-black/5 flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-card flex items-center justify-center shadow-sm border border-border flex-shrink-0">
               {item.icon}
             </div>
             <div>
-              <p className="text-[15px] font-bold" style={{ color: DARK, fontFamily: "'Fraunces', serif" }}>{item.value}</p>
-              <p className="text-[11px] text-gray-500">{item.label}</p>
+              <p className="text-[15px] font-bold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>{item.value}</p>
+              <p className="text-[11px] text-muted-foreground">{item.label}</p>
             </div>
           </div>
         ))}
@@ -123,17 +123,17 @@ export function TrustBar() {
 export function FeatureSection({ feat, idx }: { feat: typeof features[0]; idx: number }) {
   const isOdd = idx % 2 === 1;
   return (
-    <section className={`py-16 lg:py-24 ${isOdd ? "bg-gray-50/60" : "bg-white"}`}>
+    <section className={`py-16 lg:py-24 ${isOdd ? "bg-muted/30" : "bg-background"}`}>
       <div className="max-w-6xl mx-auto px-5">
         <div className={`grid lg:grid-cols-2 gap-12 lg:gap-20 items-center ${isOdd ? "lg:grid-flow-dense" : ""}`}>
           <div className={isOdd ? "lg:col-start-2" : ""}>
             <span className="inline-block text-[12px] font-bold uppercase tracking-widest mb-4 px-3 py-1 rounded-full" style={{ color: PRIMARY, background: PRIMARY + "12" }}>
               {feat.tag}
             </span>
-            <h2 className="text-[30px] lg:text-[38px] font-bold leading-tight mb-4" style={{ color: DARK, fontFamily: "'Fraunces', serif" }}>
+            <h2 className="text-[30px] lg:text-[38px] font-bold leading-tight mb-4 text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
               {feat.title}
             </h2>
-            <p className="text-[15px] text-gray-500 leading-relaxed mb-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+            <p className="text-[15px] text-muted-foreground leading-relaxed mb-6" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
               {feat.body}
             </p>
             <button className="group flex items-center gap-2 text-[14px] font-semibold transition-colors hover:gap-3" style={{ color: PRIMARY }}>
@@ -156,13 +156,13 @@ export function HowItWorks() {
     { n: "03", title: "Llena tu agenda sin esfuerzo", body: "Recibe confirmaciones automáticas, cobros online y recordatorios que reducen las ausencias." },
   ];
   return (
-    <section className="py-16 lg:py-24 bg-white">
+    <section className="py-16 lg:py-24 bg-background">
       <div className="max-w-6xl mx-auto px-5">
         <div className="text-center mb-14">
           <span className="inline-block text-[12px] font-bold uppercase tracking-widest mb-4 px-3 py-1 rounded-full" style={{ color: ACCENT, background: ACCENT + "10" }}>
             Cómo funciona
           </span>
-          <h2 className="text-[32px] lg:text-[42px] font-bold leading-tight" style={{ color: DARK, fontFamily: "'Fraunces', serif" }}>
+          <h2 className="text-[32px] lg:text-[42px] font-bold leading-tight text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
             Listo en menos de 10 minutos.
           </h2>
         </div>
@@ -173,8 +173,8 @@ export function HowItWorks() {
               <div className="w-14 h-14 rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-md" style={{ background: i === 0 ? PRIMARY : i === 1 ? ACCENT : "#D9A05B" }}>
                 <span className="text-[16px] font-bold text-white" style={{ fontFamily: "'Fraunces', serif" }}>{step.n}</span>
               </div>
-              <h3 className="text-[17px] font-bold mb-2" style={{ color: DARK, fontFamily: "'Fraunces', serif" }}>{step.title}</h3>
-              <p className="text-[13px] text-gray-500 leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{step.body}</p>
+              <h3 className="text-[17px] font-bold mb-2 text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>{step.title}</h3>
+              <p className="text-[13px] text-muted-foreground leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{step.body}</p>
             </div>
           ))}
         </div>
@@ -185,33 +185,33 @@ export function HowItWorks() {
 
 export function Testimonials() {
   return (
-    <section className="py-16 lg:py-24 bg-gray-50/60">
+    <section className="py-16 lg:py-24 bg-muted/30">
       <div className="max-w-6xl mx-auto px-5">
         <div className="text-center mb-14">
           <span className="inline-block text-[12px] font-bold uppercase tracking-widest mb-4 px-3 py-1 rounded-full" style={{ color: PRIMARY, background: PRIMARY + "12" }}>
             Testimonios
           </span>
-          <h2 className="text-[32px] lg:text-[42px] font-bold" style={{ color: DARK, fontFamily: "'Fraunces', serif" }}>
+          <h2 className="text-[32px] lg:text-[42px] font-bold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
             Lo que dicen quienes ya{" "}
             <em style={{ color: PRIMARY, fontStyle: "italic" }}>crecieron</em>.
           </h2>
         </div>
         <div className="grid md:grid-cols-3 gap-6">
           {testimonials.map(t => (
-            <div key={t.name} className="bg-white rounded-2xl p-6 shadow-sm border border-black/5 flex flex-col gap-4 hover:shadow-md transition-shadow">
+            <div key={t.name} className="bg-card rounded-2xl p-6 shadow-sm border border-border flex flex-col gap-4 hover:shadow-md transition-shadow">
               <div className="flex gap-0.5">
                 {[...Array(t.rating)].map((_,i) => <Star key={i} className="w-4 h-4 fill-amber-400 text-amber-400" />)}
               </div>
-              <p className="text-[14px] text-gray-700 leading-relaxed flex-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+              <p className="text-[14px] text-muted-foreground leading-relaxed flex-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
                 "{t.text}"
               </p>
-              <div className="flex items-center gap-3 pt-2 border-t border-gray-100">
+              <div className="flex items-center gap-3 pt-2 border-t border-border">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0" style={{ background: t.hue }}>
                   {t.initials}
                 </div>
                 <div>
-                  <p className="text-[13px] font-bold" style={{ color: DARK }}>{t.name}</p>
-                  <p className="text-[11px] text-gray-400">{t.role}</p>
+                  <p className="text-[13px] font-bold text-foreground">{t.name}</p>
+                  <p className="text-[11px] text-muted-foreground">{t.role}</p>
                 </div>
               </div>
             </div>
@@ -224,16 +224,16 @@ export function Testimonials() {
 
 export function Pricing() {
   return (
-    <section className="py-16 lg:py-24 bg-white" id="pricing">
+    <section className="py-16 lg:py-24 bg-background" id="pricing">
       <div className="max-w-6xl mx-auto px-5">
         <div className="text-center mb-14">
           <span className="inline-block text-[12px] font-bold uppercase tracking-widest mb-4 px-3 py-1 rounded-full" style={{ color: ACCENT, background: ACCENT + "10" }}>
             Precios
           </span>
-          <h2 className="text-[32px] lg:text-[42px] font-bold mb-3" style={{ color: DARK, fontFamily: "'Fraunces', serif" }}>
+          <h2 className="text-[32px] lg:text-[42px] font-bold mb-3 text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
             Sin sorpresas. Sin letra chica.
           </h2>
-          <p className="text-[15px] text-gray-500">Cancela cuando quieras. 14 días de prueba gratuita en todos los planes.</p>
+          <p className="text-[15px] text-muted-foreground">Cancela cuando quieras. 14 días de prueba gratuita en todos los planes.</p>
         </div>
         <div className="grid md:grid-cols-3 gap-6 items-stretch">
           {plans.map(plan => (
