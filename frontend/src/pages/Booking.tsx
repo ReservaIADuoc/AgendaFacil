@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, Link } from "react-router";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { DayPicker } from "react-day-picker";
-import { Calendar, Clock, MapPin, ChevronLeft, Video, Building, Activity } from "lucide-react";
+import { Calendar, Clock, MapPin, ChevronLeft, Video, Building, Activity, ArrowLeft } from "lucide-react";
 import "react-day-picker/dist/style.css";
 
 const PRIMARY = "#C0987A";
@@ -47,10 +47,10 @@ const SERVICES: Service[] = [
 export default function Booking() {
   const { username } = useParams();
   const navigate = useNavigate();
-  
+
   // Step 0: Service | Step 1: Date | Step 2: Time | Step 3: Form
   const [step, setStep] = useState<0 | 1 | 2 | 3>(0);
-  
+
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -79,19 +79,19 @@ export default function Booking() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     // Simulate API call, then redirect to success
-    navigate(`/book/${username || 'valentina-rojas'}/success`, { 
-      state: { 
+    navigate(`/book/${username || 'valentina-rojas'}/success`, {
+      state: {
         professionalName,
         serviceName: selectedService?.name,
         date: selectedDate ? format(selectedDate, "EEEE, d 'de' MMMM", { locale: es }) : "",
-        time: selectedTime 
+        time: selectedTime
       }
     });
   };
 
   return (
     <div className="min-h-screen bg-[#FCFBF8] py-12 px-4 flex items-center justify-center relative" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      
+
       {/* Botón Volver */}
       <Link to="/dashboard" className="absolute top-6 left-6 md:top-8 md:left-8 flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#C0987A] transition-colors">
         <ArrowLeft className="w-4 h-4" />
@@ -99,7 +99,7 @@ export default function Booking() {
       </Link>
 
       <div className="max-w-4xl w-full">
-        
+
         {/* Header / Profile */}
         <div className="bg-white rounded-3xl p-6 shadow-sm border border-black/5 mb-6 flex items-center gap-5">
           <div className="w-20 h-20 rounded-2xl flex items-center justify-center text-2xl text-white font-bold" style={{ background: PRIMARY }}>
@@ -113,11 +113,11 @@ export default function Booking() {
 
         {/* Main Booking Area */}
         <div className="bg-white rounded-3xl shadow-sm border border-black/5 overflow-hidden flex flex-col md:flex-row min-h-[500px]">
-          
+
           {/* Left Sidebar (Summary) */}
           <div className="w-full md:w-1/3 bg-[#F3EFE9]/50 p-6 border-b md:border-b-0 md:border-r border-[#D1CEC4]">
             <h3 className="font-bold text-[#2C2A29] mb-4 uppercase tracking-wider text-xs">Resumen de tu cita</h3>
-            
+
             {!selectedService ? (
               <p className="text-sm text-gray-500 italic">Selecciona un servicio para comenzar.</p>
             ) : (
@@ -147,9 +147,9 @@ export default function Booking() {
                 )}
               </div>
             )}
-            
+
             {step > 0 && (
-              <button 
+              <button
                 onClick={() => setStep((step - 1) as any)}
                 className="mt-8 flex items-center gap-2 text-sm font-semibold text-[#C0987A] hover:text-[#A9B3A2] transition-colors"
               >
@@ -160,7 +160,7 @@ export default function Booking() {
 
           {/* Right Content Area */}
           <div className="w-full md:w-2/3 p-6 md:p-8 flex flex-col">
-            
+
             {/* Step 0: Service Selection */}
             {step === 0 && (
               <div className="animate-in fade-in slide-in-from-right-4 duration-300">
@@ -169,7 +169,7 @@ export default function Booking() {
                   {SERVICES.map(service => {
                     const Icon = service.icon;
                     return (
-                      <div 
+                      <div
                         key={service.id}
                         onClick={() => handleServiceSelect(service)}
                         className="p-5 rounded-2xl border border-gray-200 hover:border-[#C0987A] hover:shadow-md cursor-pointer transition-all flex items-center gap-4 bg-white"
@@ -202,7 +202,7 @@ export default function Booking() {
               <div className="animate-in fade-in slide-in-from-right-4 duration-300">
                 <h2 className="text-xl font-bold text-[#2C2A29] mb-6" style={{ fontFamily: "'Fraunces', serif" }}>Selecciona una fecha</h2>
                 <div className="flex justify-center border border-[#D1CEC4] rounded-2xl p-4 bg-white">
-                  <DayPicker 
+                  <DayPicker
                     mode="single"
                     selected={selectedDate}
                     onSelect={handleDateSelect}
@@ -229,7 +229,7 @@ export default function Booking() {
                 <p className="text-[#7E7870] text-sm mb-6 capitalize">
                   {selectedDate && format(selectedDate, "EEEE, d 'de' MMMM", { locale: es })}
                 </p>
-                
+
                 <div className="grid grid-cols-3 gap-3">
                   {availableTimes.map(time => (
                     <button
@@ -250,7 +250,7 @@ export default function Booking() {
                 <h2 className="text-xl font-bold text-[#2C2A29] mb-6" style={{ fontFamily: "'Fraunces', serif" }}>
                   Tus datos
                 </h2>
-                
+
                 <form className="space-y-4 flex-1" onSubmit={handleSubmit}>
                   <div>
                     <label className="block text-sm font-medium text-[#4A4641] mb-1">Nombre completo</label>
@@ -264,7 +264,7 @@ export default function Booking() {
                     <label className="block text-sm font-medium text-[#4A4641] mb-1">Teléfono móvil</label>
                     <input type="tel" className="w-full px-4 py-3 rounded-xl border border-[#D1CEC4] bg-[#F3EFE9]/50 focus:bg-white focus:ring-2 focus:ring-[#C0987A] focus:border-transparent outline-none transition-all" />
                   </div>
-                  
+
                   <div className="pt-6 mt-auto">
                     <button type="submit" className="w-full py-4 rounded-xl text-white font-bold text-lg hover:opacity-90 transition-all shadow-md" style={{ background: PRIMARY }}>
                       Confirmar cita
