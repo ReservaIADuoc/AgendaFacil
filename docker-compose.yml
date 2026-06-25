@@ -1,0 +1,87 @@
+# ubicación: docker-compose.yml (raíz del proyecto)
+
+services:
+
+  gateway-api:
+    build:
+      context: ./backend
+      dockerfile: gateway-api/dockerfile
+    container_name: gateway-api
+    ports:
+      - "8080:8080"
+    networks:
+      - agendafacil-net
+    depends_on:
+      - auth-service
+      - clients-service
+      - services-service
+      - notifications-service
+      - appointments-service
+
+  auth-service:
+    build:
+      context: ./backend
+      dockerfile: auth-service/dockerfile
+    container_name: auth-service
+    ports:
+      - "8081:8081"
+    networks:
+      - agendafacil-net
+
+  appointments-service:
+    build:
+      context: ./backend
+      dockerfile: appointments-service/dockerfile
+    container_name: appointments-service
+    ports:
+      - "8082:8082"
+    networks:
+      - agendafacil-net
+    # usa la base de datos postgres en railway definida en su application.properties,
+    # no levanta una base de datos local.
+
+  clients-service:
+    build:
+      context: ./backend
+      dockerfile: clients-service/dockerfile
+    container_name: clients-service
+    ports:
+      - "8083:8083"
+    networks:
+      - agendafacil-net
+
+  services-service:
+    build:
+      context: ./backend
+      dockerfile: services-service/dockerfile
+    container_name: services-service
+    ports:
+      - "8084:8084"
+    networks:
+      - agendafacil-net
+
+  notifications-service:
+    build:
+      context: ./backend
+      dockerfile: notifications-service/dockerfile
+    container_name: notifications-service
+    ports:
+      - "8085:8085"
+    networks:
+      - agendafacil-net
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: dockerfile
+    container_name: frontend
+    ports:
+      - "80:80"
+    networks:
+      - agendafacil-net
+    depends_on:
+      - gateway-api
+
+networks:
+  agendafacil-net:
+    driver: bridge
