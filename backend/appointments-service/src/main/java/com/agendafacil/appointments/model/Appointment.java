@@ -29,11 +29,11 @@ public class Appointment {
     private OffsetDateTime endAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false)
+    @Column(name = "status", nullable = false, length = 32)
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_status", nullable = false)
+    @Column(name = "payment_status", nullable = false, length = 32)
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
 
     @Column(name = "client_notes", columnDefinition = "text")
@@ -67,6 +67,9 @@ public class Appointment {
     private OffsetDateTime updatedAt;
 
     public Appointment() {
+        OffsetDateTime now = OffsetDateTime.now();
+        this.createdAt = now;
+        this.updatedAt = now;
     }
 
     @PrePersist

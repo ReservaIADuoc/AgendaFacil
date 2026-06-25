@@ -1,16 +1,17 @@
 package com.agendafacil.appointments.config;
 
-import com.agendafacil.appointments.model.Appointment;
-import com.agendafacil.appointments.model.AppointmentStatus;
-import com.agendafacil.appointments.model.PaymentStatus;
-import com.agendafacil.appointments.service.AppointmentService;
+import java.time.OffsetDateTime;
+import java.util.Arrays;
+import java.util.UUID;
+
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.OffsetDateTime;
-import java.util.Arrays;
-import java.util.UUID;
+import com.agendafacil.appointments.model.Appointment;
+import com.agendafacil.appointments.model.AppointmentStatus;
+import com.agendafacil.appointments.model.PaymentStatus;
+import com.agendafacil.appointments.service.AppointmentService;
 
 @Configuration
 public class DataLoader {
@@ -39,7 +40,11 @@ public class DataLoader {
             future.setStatus(AppointmentStatus.CONFIRMED);
             future.setPaymentStatus(PaymentStatus.UNPAID);
 
-            service.saveInitial(Arrays.asList(past, future));
+            try {
+                service.saveInitial(Arrays.asList(past, future));
+            } catch (org.springframework.dao.DataIntegrityViolationException e) {
+                // datos de seed ya cargados en un arranque previo, ignorar
+            }
         };
     }
 }
