@@ -2,9 +2,10 @@
   # Citas gestión plataforma
 
 
-  ## Running the code
+  ## Como ejecutar:
 
-  Run `npm i` to install the dependencies.
+  docker compose up --build en carpeta raiz
 
-  Run `npm run dev` to start the development server.
+  http://localhost
+  en navegador
   
