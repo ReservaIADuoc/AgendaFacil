@@ -1,6 +1,8 @@
 package com.agendafacil.appointments.model;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
@@ -29,11 +31,13 @@ public class Appointment {
     private OffsetDateTime endAt;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 32)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "status", nullable = false, columnDefinition = "appointment_status")
     private AppointmentStatus status = AppointmentStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "payment_status", nullable = false, length = 32)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
+    @Column(name = "payment_status", nullable = false, columnDefinition = "payment_status")
     private PaymentStatus paymentStatus = PaymentStatus.UNPAID;
 
     @Column(name = "client_notes", columnDefinition = "text")
