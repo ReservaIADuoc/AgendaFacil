@@ -1,4 +1,4 @@
-import { X, User, Bell, Shield, Palette, Link2, Settings as SettingsIcon, LogOut } from "lucide-react";
+import { X, User, Bell, Shield, Palette, Link2, Settings as SettingsIcon, LogOut, Sparkles } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useToast } from "../../contexts/ToastContext";
 import { useAuth, API_BASE_URL } from "../../contexts/AuthContext";
@@ -18,6 +18,7 @@ export default function SettingsModal({ isOpen, onClose }: { isOpen: boolean, on
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [avatar, setAvatar] = useState("");
+  const [geminiKey, setGeminiKey] = useState(localStorage.getItem("gemini_api_key") || "");
 
   // Initialize input states when modal opens or user context loads
   useEffect(() => {
@@ -251,6 +252,51 @@ export default function SettingsModal({ isOpen, onClose }: { isOpen: boolean, on
                     <button className="px-4 py-2 border border-border text-muted-foreground rounded-xl text-sm font-bold opacity-50 cursor-not-allowed">
                       Próximamente
                     </button>
+                  </div>
+
+                  {/* Gemini AI */}
+                  <div className="flex flex-col gap-4 p-5 border border-border rounded-2xl bg-muted/10 hover:border-[#C0987A]/50 transition-colors">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 bg-gradient-to-tr from-[#C0987A] to-[#D9A05B] rounded-xl flex items-center justify-center p-2.5">
+                          <Sparkles className="w-6 h-6 text-white" />
+                        </div>
+                        <div>
+                          <h4 className="font-bold text-foreground">Google Gemini AI</h4>
+                          <p className="text-xs text-muted-foreground mt-0.5">Potencia tu Copiloto con inteligencia artificial.</p>
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => {
+                          localStorage.setItem("gemini_api_key", geminiKey);
+                          showToast("API Key de Gemini guardada", "success");
+                        }}
+                        className="px-4 py-2 bg-[#C0987A] text-white rounded-xl text-sm font-bold hover:opacity-90 transition-all cursor-pointer"
+                      >
+                        Guardar
+                      </button>
+                    </div>
+                    <div className="mt-2">
+                      <label className="block text-xs font-bold text-foreground mb-1.5 uppercase tracking-wide">Gemini API Key</label>
+                      <input 
+                        type="password"
+                        placeholder="AIzaSy..."
+                        value={geminiKey}
+                        onChange={(e) => setGeminiKey(e.target.value)}
+                        className="w-full px-4 py-2.5 rounded-xl border border-border focus:ring-2 focus:ring-[#C0987A] focus:outline-none text-sm bg-muted/30 text-foreground"
+                      />
+                      <p className="text-[11px] text-muted-foreground mt-1.5">
+                        Puedes obtener una API Key gratis en{" "}
+                        <a 
+                          href="https://aistudio.google.com/" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-[#C0987A] hover:underline font-semibold"
+                        >
+                          Google AI Studio
+                        </a>.
+                      </p>
+                    </div>
                   </div>
 
                 </div>
