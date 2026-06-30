@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, Outlet } from "react-router";
+import { Link, Outlet, useParams } from "react-router";
 import CopilotChat from "../components/shared/CopilotChat";
 import { Calendar, Menu, X, Sun, Moon } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
@@ -142,13 +142,14 @@ function Footer() {
 }
 
 export default function Layout() {
+  const { username } = useParams();
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <Nav />
       <main className="pt-24">
         <Outlet />
       </main>
-      <CopilotChat />
+      <CopilotChat mode={username ? "client" : "professional"} username={username} />
       <Footer />
     </div>
   );

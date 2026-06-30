@@ -9,12 +9,10 @@ type Message = {
   isActionCard?: boolean;
 };
 
-export default function CopilotChat() {
+export default function CopilotChat({ mode = "professional", username }: { mode?: "professional" | "client"; username?: string }) {
   const [isOpen, setIsOpen] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
-  const [messages, setMessages] = useState<Message[]>([
-    { id: 1, role: "ai", text: "Hola, soy tu asistente de Inteligencia Artificial de Agenda Fácil. ¿En qué te puedo ayudar hoy?" }
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -23,6 +21,18 @@ export default function CopilotChat() {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
+
+  useEffect(() => {
+    setMessages([
+      {
+        id: 1,
+        role: "ai",
+        text: mode === "client"
+          ? "Hola, soy el asistente virtual de reservas. ¿Deseas agendar una hora o consultar la disponibilidad de atención?"
+          : "Hola, soy tu asistente de Inteligencia Artificial de Agenda Fácil. ¿En qué te puedo ayudar hoy?"
+      }
+    ]);
+  }, [mode]);
 
   useEffect(() => {
     scrollToBottom();
@@ -44,16 +54,20 @@ export default function CopilotChat() {
     setInput("");
     setIsTyping(true);
 
+    const isClient = mode === "client";
+    const endpoint = isClient ? "/appointments/public/ai/chat" : "/appointments/ai/chat";
+
     try {
-      const response = await fetch(`${API_BASE_URL}/appointments/ai/chat`, {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          ...(token ? { "Authorization": `Bearer ${token}` } : {})
+          ...(!isClient && token ? { "Authorization": `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           message: input,
           sessionId: sessionId,
+          username: username,
           history: messages.map(msg => ({
             role: msg.role === 'user' ? 'user' : 'model',
             text: msg.text
