@@ -10,8 +10,9 @@ type Message = {
 
 export default function CopilotChat() {
   const [isOpen, setIsOpen] = useState(false);
+  const [apiKey, setApiKey] = useState(localStorage.getItem("gemini_api_key") || "");
   const [messages, setMessages] = useState<Message[]>([
-    { id: 1, role: "ai", text: "Hola, soy tu asistente de Inteligencia Artificial. ¿En qué te puedo ayudar hoy?" }
+    { id: 1, role: "ai", text: "Hola, soy tu asistente de Inteligencia Artificial de Agenda Fácil. ¿En qué te puedo ayudar hoy?" }
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
@@ -26,6 +27,12 @@ export default function CopilotChat() {
   }, [messages, isTyping, isOpen]);
 
   useEffect(() => {
+    if (isOpen) {
+      setApiKey(localStorage.getItem("gemini_api_key") || "");
+    }
+  }, [isOpen]);
+
+  useEffect(() => {
     const handleOpen = () => setIsOpen(true);
     window.addEventListener("open-copilot", handleOpen);
     return () => {
@@ -33,7 +40,7 @@ export default function CopilotChat() {
     };
   }, []);
 
-  const handleSend = () => {
+  const handleSend = async () => {
     if (!input.trim()) return;
     
     const userMsg: Message = { id: Date.now(), role: "user", text: input };
@@ -41,28 +48,88 @@ export default function CopilotChat() {
     setInput("");
     setIsTyping(true);
 
-    // Mock AI response
-    setTimeout(() => {
+    const activeKey = apiKey || localStorage.getItem("gemini_api_key") || "";
+
+    if (!activeKey) {
+      setTimeout(() => {
+        setIsTyping(false);
+        setMessages(prev => [
+          ...prev,
+          {
+            id: Date.now() + 1,
+            role: "ai",
+            text: "⚠️ Para poder usar la Inteligencia Artificial real, por favor ingresa tu Gemini API Key en la sección de 'Ajustes > Integraciones' de tu Panel de Control o usa las respuestas de prueba de demostración.\n\nSugerencia de prueba: 'Entendido. Según tu disponibilidad, el próximo espacio libre es el Jueves a las 15:00 hrs para Terapia. ¿Deseas que lo reserve por ti?'",
+            isActionCard: true
+          }
+        ]);
+      }, 1000);
+      return;
+    }
+
+    try {
+      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`;
+      
+      const contents = messages.map(msg => ({
+        role: msg.role === 'user' ? 'user' : 'model',
+        parts: [{ text: msg.text }]
+      }));
+      
+      contents.push({
+        role: 'user',
+        parts: [{ text: input }]
+      });
+
+      const systemInstruction = {
+        parts: [{
+          text: "Eres el Copiloto IA de Agenda Fácil, una aplicación moderna de gestión de citas para profesionales independientes (psicólogos, coaches, fisioterapeutas, médicos, etc.). Eres un asistente útil y amigable. Ayuda al profesional a organizar su agenda, responder dudas sobre su negocio, redactar recordatorios o mensajes para clientes, estructurar notas de citas y proponer mejoras en su agenda. Sé muy breve, amigable y responde siempre en español. No utilices formato markdown complejo, solo texto simple, saltos de línea y emojis."
+        }]
+      };
+
+      const response = await fetch(url, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents,
+          systemInstruction
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData?.error?.message || `Error HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
+      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo obtener una respuesta.";
+      
       setIsTyping(false);
       
-      let aiResponse: Message;
-      if (userMsg.text.toLowerCase().includes("cita") || userMsg.text.toLowerCase().includes("hora")) {
-         aiResponse = {
-           id: Date.now() + 1,
-           role: "ai",
-           text: "Entendido. Según tu disponibilidad, el próximo espacio libre es el Jueves a las 15:00 hrs para Terapia. ¿Deseas que lo reserve por ti?",
-           isActionCard: true
-         };
-      } else {
-         aiResponse = {
-           id: Date.now() + 1,
-           role: "ai",
-           text: "He analizado tus datos y puedo ayudarte a automatizar eso si me lo permites. Como IA, puedo predecir tus picos de demanda."
-         };
-      }
-      
-      setMessages(prev => [...prev, aiResponse]);
-    }, 1500);
+      const lowercaseText = text.toLowerCase();
+      const isAction = lowercaseText.includes("cita") || lowercaseText.includes("hora") || lowercaseText.includes("reservar") || lowercaseText.includes("agendar");
+
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "ai",
+          text: text,
+          isActionCard: isAction
+        }
+      ]);
+    } catch (error: any) {
+      console.error("Gemini API Error:", error);
+      setIsTyping(false);
+      setMessages(prev => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "ai",
+          text: `❌ Error al conectar con Gemini: ${error?.message || "Error desconocido"}. Por favor verifica tu API Key.`
+        }
+      ]);
+    }
   };
 
   return (
