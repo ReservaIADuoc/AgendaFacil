@@ -1,0 +1,21 @@
+# ubicación: backend/gateway-api/dockerfile
+
+# etapa 1: compilar el jar con maven
+FROM maven:3.9-eclipse-temurin-17 AS build
+WORKDIR /workspace
+
+COPY pom.xml ./pom.xml
+COPY gateway-api/pom.xml ./gateway-api/pom.xml
+RUN mvn -f gateway-api/pom.xml -B dependency:go-offline
+
+COPY gateway-api/src ./gateway-api/src
+RUN mvn -f gateway-api/pom.xml -B clean package -DskipTests
+
+# etapa 2: imagen final, solo con el jre (más liviana)
+FROM eclipse-temurin:17-jre-alpine
+WORKDIR /app
+
+COPY --from=build /workspace/gateway-api/target/*.jar app.jar
+
+EXPOSE 8080
+ENTRYPOINT ["java", "-jar", "app.jar"]

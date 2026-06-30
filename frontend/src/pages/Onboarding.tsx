@@ -1,31 +1,77 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router";
-import { User, Clock, BriefcaseMedical, CheckCircle, Calendar as CalendarIcon, ChevronDown, ChevronLeft, ArrowLeft } from "lucide-react";
+import { User, Clock, BriefcaseMedical, CheckCircle, Calendar as CalendarIcon, ChevronDown, ChevronLeft, ArrowLeft, CalendarDays } from "lucide-react";
 import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import "react-day-picker/dist/style.css";
 
 const PRIMARY = "#C0987A";
-const DARK = "#2C2A29";
+
+const DAYS_OF_WEEK_SPANISH = [
+  { id: "MONDAY", label: "Lunes" },
+  { id: "TUESDAY", label: "Martes" },
+  { id: "WEDNESDAY", label: "Miércoles" },
+  { id: "THURSDAY", label: "Jueves" },
+  { id: "FRIDAY", label: "Viernes" },
+  { id: "SATURDAY", label: "Sábado" },
+  { id: "SUNDAY", label: "Domingo" },
+];
 
 export default function Onboarding() {
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
   
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
-  const [isWorkingDay, setIsWorkingDay] = useState(true);
+  // Paso 2: Horario Semanal
+  const [weeklyHours, setWeeklyHours] = useState<Record<string, { active: boolean; from: string; to: string }>>({
+    MONDAY: { active: true, from: "09:00", to: "18:00" },
+    TUESDAY: { active: true, from: "09:00", to: "18:00" },
+    WEDNESDAY: { active: true, from: "09:00", to: "18:00" },
+    THURSDAY: { active: true, from: "09:00", to: "18:00" },
+    FRIDAY: { active: true, from: "09:00", to: "18:00" },
+    SATURDAY: { active: false, from: "09:00", to: "14:00" },
+    SUNDAY: { active: false, from: "09:00", to: "14:00" },
+  });
+
+  // Paso 2: Excepciones / Feriados (Selección Múltiple)
+  const [onboardingTab, setOnboardingTab] = useState<"weekly" | "holidays">("weekly");
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [isDatesWorkingDay, setIsDatesWorkingDay] = useState(false); // Por defecto marcados como libre
+  const [customFrom, setCustomFrom] = useState("09:00");
+  const [customTo, setCustomTo] = useState("18:00");
 
   const handleNext = () => {
     if (step < 3) setStep(step + 1);
     else navigate("/dashboard");
   };
 
-  const renderTimeSelect = (defaultValue: string) => (
+  const handleWeeklyToggle = (dayId: string) => {
+    setWeeklyHours(prev => ({
+      ...prev,
+      [dayId]: {
+        ...prev[dayId],
+        active: !prev[dayId].active
+      }
+    }));
+  };
+
+  const handleWeeklyTimeChange = (dayId: string, type: "from" | "to", val: string) => {
+    setWeeklyHours(prev => ({
+      ...prev,
+      [dayId]: {
+        ...prev[dayId],
+        [type]: val
+      }
+    }));
+  };
+
+  const renderTimeSelect = (value: string, onChange: (val: string) => void, disabled = false) => (
     <div className="relative">
       <select 
-        defaultValue={defaultValue} 
-        className="appearance-none bg-[#F3EFE9]/70 text-[#2C2A29] font-bold px-5 py-3 rounded-xl outline-none focus:ring-2 focus:ring-[#C0987A] border border-transparent hover:border-[#D1CEC4] transition-all pr-10 cursor-pointer text-sm"
+        value={value} 
+        disabled={disabled}
+        onChange={(e) => onChange(e.target.value)}
+        className="appearance-none bg-muted text-foreground font-bold px-4 py-2.5 rounded-xl outline-none focus:ring-2 focus:ring-[#C0987A] border border-border hover:border-muted-foreground/30 transition-all pr-10 cursor-pointer text-sm disabled:opacity-40"
       >
         {Array.from({ length: 24 }).map((_, h) => {
           const hourStr = h.toString().padStart(2, '0');
@@ -35,30 +81,30 @@ export default function Onboarding() {
         })}
       </select>
       <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-        <ChevronDown className="w-4 h-4 text-[#A9B3A2]" />
+        <ChevronDown className="w-4 h-4 text-muted-foreground" />
       </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FCFBF8] text-[#2C2A29]" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="min-h-screen flex flex-col bg-background text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       {/* Header */}
-      <header className="h-16 flex items-center justify-between px-6 border-b border-black/5 bg-white">
-        <span className="text-[17px] font-bold" style={{ color: DARK, fontFamily: "'Fraunces', serif" }}>Agenda Fácil</span>
-        <div className="text-sm font-medium text-[#7E7870]">Paso {step} de 3</div>
+      <header className="h-16 flex items-center justify-between px-6 border-b border-border bg-card">
+        <span className="text-[17px] font-bold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>Agenda Fácil</span>
+        <div className="text-sm font-medium text-muted-foreground">Paso {step} de 3</div>
       </header>
 
       {/* Main content */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
-        <div className={`w-full ${step === 2 ? 'max-w-4xl' : 'max-w-2xl'} bg-white rounded-3xl p-8 md:p-12 shadow-sm border border-black/5 transition-all duration-500`}>
+        <div className={`w-full ${step === 2 ? 'max-w-4xl' : 'max-w-2xl'} bg-card rounded-3xl p-8 md:p-12 shadow-xl border border-border transition-all duration-500`}>
 
           {/* Progress bar */}
           <div className="flex justify-between mb-12 relative max-w-xl mx-auto">
-            <div className="absolute top-1/2 left-0 right-0 h-1 bg-[#F3EFE9] -z-10 -translate-y-1/2"></div>
+            <div className="absolute top-1/2 left-0 right-0 h-1 bg-muted -z-10 -translate-y-1/2"></div>
             <div className="absolute top-1/2 left-0 h-1 bg-[#C0987A] -z-10 -translate-y-1/2 transition-all duration-500" style={{ width: `${((step - 1) / 2) * 100}%` }}></div>
 
             {[1, 2, 3].map(i => (
-              <div key={i} className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 shadow-sm ${step >= i ? 'bg-[#C0987A] text-white' : 'bg-[#F3EFE9] text-[#A9B3A2]'}`}>
+              <div key={i} className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 shadow-sm ${step >= i ? 'bg-[#C0987A] text-white' : 'bg-muted text-muted-foreground'}`}>
                 {i === 1 ? <User className="w-4 h-4" /> : i === 2 ? <Clock className="w-4 h-4" /> : <BriefcaseMedical className="w-4 h-4" />}
               </div>
             ))}
@@ -68,13 +114,13 @@ export default function Onboarding() {
           <div className="min-h-[300px] flex flex-col">
             {step === 1 && (
               <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1 max-w-xl mx-auto w-full">
-                <h1 className="text-3xl font-bold mb-2 text-[#2C2A29]" style={{ fontFamily: "'Fraunces', serif" }}>Completa tu perfil</h1>
-                <p className="text-[#7E7870] mb-8">Esta información será visible para tus pacientes.</p>
+                <h1 className="text-3xl font-bold mb-2 text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>Completa tu perfil</h1>
+                <p className="text-muted-foreground mb-8">Esta información será visible para tus pacientes.</p>
 
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-[#4A4641] mb-1">¿A qué te dedicas?</label>
-                    <select className="w-full px-4 py-3 rounded-xl border border-[#D1CEC4] bg-white focus:ring-2 focus:ring-[#C0987A] outline-none">
+                    <label className="block text-sm font-medium text-foreground mb-1">¿A qué te dedicas?</label>
+                    <select className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none">
                       <option>Psicólogo/a</option>
                       <option>Coach</option>
                       <option>Nutricionista</option>
@@ -83,10 +129,10 @@ export default function Onboarding() {
                     </select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-[#4A4641] mb-1">Enlace personalizado</label>
+                    <label className="block text-sm font-medium text-foreground mb-1">Enlace personalizado</label>
                     <div className="flex">
-                      <span className="hidden sm:inline-flex items-center px-4 rounded-l-xl border border-r-0 border-[#D1CEC4] bg-[#F3EFE9] text-[#7E7870] text-sm">agendafacil.com/</span>
-                      <input type="text" className="flex-1 px-4 py-3 rounded-xl sm:rounded-l-none border border-[#D1CEC4] bg-white focus:ring-2 focus:ring-[#C0987A] outline-none" placeholder="tu-nombre" />
+                      <span className="hidden sm:inline-flex items-center px-4 rounded-l-xl border border-r-0 border-border bg-muted text-muted-foreground text-sm">agendafacil.com/</span>
+                      <input type="text" className="flex-1 px-4 py-3 rounded-xl sm:rounded-l-none border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none" placeholder="tu-nombre" />
                     </div>
                   </div>
                 </div>
@@ -96,98 +142,176 @@ export default function Onboarding() {
             {step === 2 && (
               <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1 w-full">
                 <div className="text-center mb-8">
-                  <h1 className="text-3xl font-bold mb-2 text-[#2C2A29]" style={{ fontFamily: "'Fraunces', serif" }}>Define tu horario y feriados</h1>
-                  <p className="text-[#7E7870]">Selecciona un día en el calendario para ajustar sus horas específicas.</p>
+                  <h1 className="text-3xl font-bold mb-2 text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>Define tu disponibilidad</h1>
+                  <p className="text-muted-foreground">Configura tu horario de la semana o añade tus feriados y días libres.</p>
                 </div>
 
-                <div className="flex flex-col md:flex-row gap-8 bg-[#FCFBF8] rounded-3xl p-6 border border-black/5">
-                  
-                  {/* Calendar Left */}
-                  <div className="flex-shrink-0 bg-white p-4 rounded-2xl border border-[#D1CEC4] shadow-sm flex justify-center">
-                    <DayPicker 
-                      mode="single"
-                      selected={selectedDate}
-                      onSelect={(d) => d && setSelectedDate(d)}
-                      locale={es}
-                      modifiersClassNames={{
-                        selected: "bg-[#C0987A] text-white hover:bg-[#C0987A] font-bold",
-                        today: "text-[#C0987A] font-bold"
-                      }}
-                      styles={{
-                        day: { borderRadius: '12px' }
-                      }}
-                    />
-                  </div>
+                {/* Tabs selector */}
+                <div className="flex border-b border-border mb-8 max-w-md mx-auto">
+                  <button
+                    type="button"
+                    onClick={() => setOnboardingTab("weekly")}
+                    className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all ${
+                      onboardingTab === "weekly"
+                        ? "border-[#C0987A] text-foreground"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Horario Semanal
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setOnboardingTab("holidays")}
+                    className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all ${
+                      onboardingTab === "holidays"
+                        ? "border-[#C0987A] text-foreground"
+                        : "border-transparent text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    Feriados y Días Libres
+                  </button>
+                </div>
 
-                  {/* Hours Right */}
-                  <div className="flex-1 bg-white p-6 rounded-2xl border border-[#D1CEC4] shadow-sm">
-                    <div className="flex items-center gap-3 mb-6 pb-4 border-b border-[#F3EFE9]">
-                      <div className="w-10 h-10 rounded-xl bg-[#F3EFE9] flex items-center justify-center">
-                        <CalendarIcon className="w-5 h-5 text-[#C0987A]" />
-                      </div>
-                      <div>
-                        <h3 className="font-bold text-[#2C2A29] capitalize">
-                          {selectedDate ? format(selectedDate, "EEEE, d 'de' MMMM", { locale: es }) : "Selecciona un día"}
-                        </h3>
-                        <p className="text-xs text-[#7E7870]">Ajusta la disponibilidad de esta fecha.</p>
-                      </div>
+                {onboardingTab === "weekly" ? (
+                  /* HORARIO SEMANAL TAB */
+                  <div className="bg-muted/40 rounded-3xl p-6 border border-border max-w-2xl mx-auto space-y-4">
+                    {DAYS_OF_WEEK_SPANISH.map(day => {
+                      const cfg = weeklyHours[day.id];
+                      return (
+                        <div key={day.id} className="flex items-center justify-between p-4 bg-card rounded-2xl border border-border gap-4 flex-wrap">
+                          <label className="flex items-center gap-3 cursor-pointer select-none">
+                            <input 
+                              type="checkbox"
+                              checked={cfg.active}
+                              onChange={() => handleWeeklyToggle(day.id)}
+                              className="w-5 h-5 text-[#C0987A] rounded border-border focus:ring-2 focus:ring-[#C0987A] outline-none accent-[#C0987A]" 
+                            />
+                            <span className="font-bold text-foreground">{day.label}</span>
+                          </label>
+                          
+                          <div className="flex items-center gap-3">
+                            <span className="text-xs text-muted-foreground uppercase">Desde</span>
+                            {renderTimeSelect(cfg.from, (val) => handleWeeklyTimeChange(day.id, "from", val), !cfg.active)}
+                            <span className="text-muted-foreground font-bold">-</span>
+                            <span className="text-xs text-muted-foreground uppercase">Hasta</span>
+                            {renderTimeSelect(cfg.to, (val) => handleWeeklyTimeChange(day.id, "to", val), !cfg.active)}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  /* EXCEPCIONES Y FERIADOS TAB (SELECCION MULTIPLE) */
+                  <div className="flex flex-col md:flex-row gap-8 bg-muted/30 rounded-3xl p-6 border border-border">
+                    {/* Calendar Left */}
+                    <div className="flex-shrink-0 bg-card p-4 rounded-2xl border border-border shadow-sm flex justify-center h-fit">
+                      <DayPicker 
+                        mode="multiple"
+                        selected={selectedDates}
+                        onSelect={(dates) => setSelectedDates(dates || [])}
+                        locale={es}
+                        modifiersClassNames={{
+                          selected: "bg-[#C0987A] text-white hover:bg-[#C0987A] font-bold",
+                          today: "text-[#C0987A] font-bold"
+                        }}
+                        styles={{
+                          day: { borderRadius: '12px' },
+                          head: { color: 'var(--color-text-muted-foreground)' }
+                        }}
+                      />
                     </div>
 
-                    {selectedDate && (
-                      <div className="space-y-6">
-                        <label className="flex items-center gap-3 cursor-pointer">
-                          <input 
-                            type="checkbox" 
-                            checked={isWorkingDay}
-                            onChange={(e) => setIsWorkingDay(e.target.checked)}
-                            className="w-5 h-5 text-[#C0987A] rounded border-[#D1CEC4] focus:ring-2 focus:ring-[#C0987A] outline-none accent-[#C0987A]" 
-                          />
-                          <span className="font-semibold text-[#4A4641]">Estoy disponible este día</span>
-                        </label>
+                    {/* Options Right */}
+                    <div className="flex-1 bg-card p-6 rounded-2xl border border-border shadow-sm flex flex-col justify-between min-h-[340px]">
+                      <div>
+                        <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
+                          <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
+                            <CalendarDays className="w-5 h-5 text-[#C0987A]" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-foreground">
+                              Días Seleccionados ({selectedDates.length})
+                            </h3>
+                            <p className="text-xs text-muted-foreground">Ajusta la disponibilidad de las fechas seleccionadas.</p>
+                          </div>
+                        </div>
 
-                        {isWorkingDay ? (
-                          <div className="bg-[#F3EFE9]/30 p-5 rounded-2xl flex flex-wrap items-center gap-4">
-                            <div>
-                              <label className="block text-xs font-bold text-[#A9B3A2] uppercase tracking-wider mb-2">Desde</label>
-                              {renderTimeSelect("09:00")}
-                            </div>
-                            <div className="pt-6 font-bold text-[#A9B3A2]">-</div>
-                            <div>
-                              <label className="block text-xs font-bold text-[#A9B3A2] uppercase tracking-wider mb-2">Hasta</label>
-                              {renderTimeSelect("18:00")}
+                        {selectedDates.length > 0 ? (
+                          <div className="space-y-6">
+                            <label className="flex items-center gap-3 cursor-pointer">
+                              <input 
+                                type="checkbox" 
+                                checked={!isDatesWorkingDay}
+                                onChange={(e) => setIsDatesWorkingDay(!e.target.checked)}
+                                className="w-5 h-5 text-[#C0987A] rounded border-border focus:ring-2 focus:ring-[#C0987A] outline-none accent-[#C0987A]" 
+                              />
+                              <span className="font-semibold text-foreground">Marcar como día libre / feriado</span>
+                            </label>
+
+                            {!isDatesWorkingDay ? (
+                              <div className="bg-muted/50 p-6 rounded-2xl text-center border border-border">
+                                <span className="text-[#C0987A] font-semibold flex items-center justify-center gap-2">
+                                  <CheckCircle className="w-5 h-5" /> Estos días no tendrás disponibilidad
+                                </span>
+                              </div>
+                            ) : (
+                              <div className="bg-muted/30 p-5 rounded-2xl flex flex-wrap items-center gap-4 border border-border">
+                                <div>
+                                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Desde</label>
+                                  {renderTimeSelect(customFrom, setCustomFrom)}
+                                </div>
+                                <div className="pt-6 font-bold text-muted-foreground">-</div>
+                                <div>
+                                  <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">Hasta</label>
+                                  {renderTimeSelect(customTo, setCustomTo)}
+                                </div>
+                              </div>
+                            )}
+
+                            <div className="text-xs text-muted-foreground bg-muted/20 p-3 rounded-lg border border-border/50">
+                              <strong>Fechas a configurar:</strong> {selectedDates.map(d => format(d, "d MMM", { locale: es })).join(", ")}
                             </div>
                           </div>
                         ) : (
-                          <div className="bg-[#F3EFE9]/50 p-6 rounded-2xl text-center">
-                            <span className="text-[#A9B3A2] font-semibold flex items-center justify-center gap-2">
-                              <CheckCircle className="w-5 h-5" /> Marcado como día libre o feriado
-                            </span>
+                          <div className="text-center py-12 text-muted-foreground">
+                            <p className="font-semibold">No hay fechas seleccionadas.</p>
+                            <p className="text-xs mt-1">Haz clic en uno o más días del calendario para marcarlos como feriados o configurar un horario especial.</p>
                           </div>
                         )}
                       </div>
-                    )}
+                      
+                      {selectedDates.length > 0 && (
+                        <button 
+                          type="button" 
+                          onClick={() => setSelectedDates([])}
+                          className="mt-4 text-xs font-bold text-muted-foreground hover:text-foreground underline text-left"
+                        >
+                          Limpiar selección
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
             )}
 
             {step === 3 && (
               <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1 max-w-xl mx-auto w-full">
-                <h1 className="text-3xl font-bold mb-2 text-[#2C2A29]" style={{ fontFamily: "'Fraunces', serif" }}>Tu primer servicio</h1>
-                <p className="text-[#7E7870] mb-8">Crea el servicio principal que ofreces a tus clientes.</p>
+                <h1 className="text-3xl font-bold mb-2 text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>Tu primer servicio</h1>
+                <p className="text-muted-foreground mb-8">Crea el servicio principal que ofreces a tus clientes.</p>
 
                 <div className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-[#4A4641] mb-1">Nombre del servicio</label>
-                    <input type="text" className="w-full px-4 py-3 rounded-xl border border-[#D1CEC4] bg-white focus:ring-2 focus:ring-[#C0987A] outline-none" placeholder="Ej. Consulta Inicial" defaultValue="Terapia Individual" />
+                    <label className="block text-sm font-medium text-foreground mb-1">Nombre del servicio</label>
+                    <input type="text" className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none" placeholder="Ej. Consulta Inicial" defaultValue="Terapia Individual" />
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
-                      <label className="block text-sm font-medium text-[#4A4641] mb-1">Duración</label>
+                      <label className="block text-sm font-medium text-foreground mb-1">Duración</label>
                       <div className="relative">
                         <select 
                           defaultValue="00:50" 
-                          className="w-full appearance-none bg-[#F3EFE9]/70 text-[#2C2A29] font-bold px-5 py-3 rounded-xl outline-none focus:ring-2 focus:ring-[#C0987A] border border-transparent hover:border-[#D1CEC4] transition-all pr-10 cursor-pointer text-sm"
+                          className="w-full appearance-none bg-muted text-foreground font-bold px-5 py-3 rounded-xl outline-none focus:ring-2 focus:ring-[#C0987A] border border-border hover:border-muted-foreground/30 transition-all pr-10 cursor-pointer text-sm"
                         >
                           <option value="00:15">00:15 (15 min)</option>
                           <option value="00:30">00:30 (30 min)</option>
@@ -206,13 +330,13 @@ export default function Onboarding() {
                           <option value="24:00">24:00 (Todo el día)</option>
                         </select>
                         <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none">
-                          <ChevronDown className="w-4 h-4 text-[#A9B3A2]" />
+                          <ChevronDown className="w-4 h-4 text-muted-foreground" />
                         </div>
                       </div>
                     </div>
                     <div className="flex-1">
-                      <label className="block text-sm font-medium text-[#4A4641] mb-1">Precio</label>
-                      <input type="text" className="w-full px-4 py-3 rounded-xl border border-[#D1CEC4] bg-white focus:ring-2 focus:ring-[#C0987A] outline-none" placeholder="Ej. $50.000" />
+                      <label className="block text-sm font-medium text-foreground mb-1">Precio</label>
+                      <input type="text" className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none" placeholder="Ej. $50.000" />
                     </div>
                   </div>
                 </div>
@@ -220,25 +344,25 @@ export default function Onboarding() {
             )}
 
             {/* Navigation buttons */}
-            <div className="mt-12 flex items-center justify-between pt-6 border-t border-black/5 max-w-xl mx-auto w-full">
+            <div className="mt-12 flex items-center justify-between pt-6 border-t border-border max-w-xl mx-auto w-full">
               {step > 1 ? (
                 <button 
                   onClick={() => setStep(step - 1)}
-                  className="px-4 sm:px-6 py-3 font-semibold text-[#7E7870] hover:text-[#2C2A29] transition-colors"
+                  className="px-4 sm:px-6 py-3 font-semibold text-muted-foreground hover:text-foreground transition-colors"
                 >
                   Atrás
                 </button>
               ) : (
                 <Link 
                   to="/register"
-                  className="px-4 sm:px-6 py-3 font-semibold text-[#7E7870] hover:text-[#2C2A29] transition-colors flex items-center gap-2"
+                  className="px-4 sm:px-6 py-3 font-semibold text-muted-foreground hover:text-foreground transition-colors flex items-center gap-2"
                 >
                   <ArrowLeft className="w-4 h-4" /> Cancelar
                 </Link>
               )}
               <button
                 onClick={handleNext}
-                className="px-6 sm:px-8 py-3 rounded-xl font-bold text-white shadow-md hover:opacity-90 transition-all flex items-center gap-2"
+                className="px-6 sm:px-8 py-3 rounded-xl font-bold text-white shadow-md hover:opacity-90 transition-all flex items-center gap-2 cursor-pointer"
                 style={{ background: PRIMARY }}
               >
                 {step === 3 ? "Finalizar y entrar" : "Continuar"}

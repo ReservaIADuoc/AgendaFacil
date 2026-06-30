@@ -1,0 +1,36 @@
+spring:
+  application:
+    name: gateway-api
+  cloud:
+    gateway:
+      # Cada "route" mapea un path público hacia un microservicio interno.
+      # Los hosts "services-service" y "notifications-service" son los nombres
+      # de los contenedores definidos en docker-compose.yml (DNS interno de Docker).
+      routes:
+        - id: services-service
+          uri: http://services-service:8084
+          predicates:
+            - Path=/api/services/**
+
+        - id: notifications-service
+          uri: http://notifications-service:8085
+          predicates:
+            - Path=/api/notifications/**
+
+        - id: auth-service
+          uri: http://auth-service:8081
+          predicates:
+            - Path=/api/auth/**
+
+        - id: clients-service
+          uri: http://clients-service:8083
+          predicates:
+            - Path=/api/clients/**
+
+        - id: appointments-service
+          uri: http://appointments-service:8082
+          predicates:
+            - Path=/api/appointments/**,/api/bookings/**,/api/professionals/**
+
+server:
+  port: 8080

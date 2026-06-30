@@ -1,7 +1,42 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { ArrowRight, Calendar } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 
 export default function Login() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const { token, login } = useAuth();
+  const navigate = useNavigate();
+  const { showToast } = useToast();
+
+  useEffect(() => {
+    if (token) {
+      navigate("/dashboard");
+    }
+  }, [token, navigate]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      showToast("Por favor, completa todos los campos", "error");
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      await login(email, password);
+      showToast("¡Sesión iniciada con éxito!", "success");
+      navigate("/dashboard");
+    } catch (error: any) {
+      showToast(error.message || "Credenciales inválidas", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       <div className="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center">
@@ -26,7 +61,7 @@ export default function Login() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-card py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-border">
-          <form className="space-y-6" action="#" method="POST">
+          <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-foreground">
                 Correo electrónico
@@ -38,6 +73,8 @@ export default function Login() {
                   type="email"
                   autoComplete="email"
                   required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   className="block w-full appearance-none rounded-xl border border-border px-3 py-2 placeholder-muted-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-muted text-foreground"
                 />
               </div>
@@ -54,6 +91,8 @@ export default function Login() {
                   type="password"
                   autoComplete="current-password"
                   required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                   className="block w-full appearance-none rounded-xl border border-border px-3 py-2 placeholder-muted-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-muted text-foreground"
                 />
               </div>
@@ -80,13 +119,14 @@ export default function Login() {
             </div>
 
             <div>
-              <Link
-                to="/dashboard"
-                className="flex w-full justify-center items-center gap-2 rounded-xl border border-transparent bg-[#C0987A] py-3 px-4 text-sm font-bold text-white shadow-sm hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-[#C0987A] focus:ring-offset-2 transition-all"
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex w-full justify-center items-center gap-2 rounded-xl border border-transparent bg-[#C0987A] py-3 px-4 text-sm font-bold text-white shadow-sm hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-[#C0987A] focus:ring-offset-2 transition-all cursor-pointer disabled:opacity-50"
               >
-                Ingresar
+                {loading ? "Ingresando..." : "Ingresar"}
                 <ArrowRight className="w-4 h-4" />
-              </Link>
+              </button>
             </div>
           </form>
         </div>
