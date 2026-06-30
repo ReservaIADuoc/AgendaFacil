@@ -16,6 +16,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
     @Query(value = "SELECT id FROM professionals WHERE email = :email", nativeQuery = true)
     java.util.Optional<UUID> findProfessionalIdByEmail(@Param("email") String email);
 
+    @Query(value = "SELECT username_slug FROM professionals WHERE email = :email", nativeQuery = true)
+    java.util.Optional<String> findUsernameSlugByEmail(@Param("email") String email);
+
     @Query("SELECT a FROM Appointment a WHERE a.professionalId = :profId AND a.startAt < :end AND a.endAt > :start AND a.status NOT IN :excluded")
     List<Appointment> findOverlapping(@Param("profId") UUID professionalId, @Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end, @Param("excluded") List<AppointmentStatus> excluded);
 

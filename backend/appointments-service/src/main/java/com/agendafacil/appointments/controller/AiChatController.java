@@ -54,6 +54,7 @@ public class AiChatController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Profesional no encontrado"));
         }
         UUID professionalId = profIdOpt.get();
+        String slug = repository.findUsernameSlugByEmail(resolvedEmail).orElse("valentina-rojas");
 
         String userMessage = (String) body.get("message");
         String sessionIdStr = (String) body.get("sessionId");
@@ -67,11 +68,11 @@ public class AiChatController {
 
         try {
             // Load professional profile details to build context
-            Map<String, Object> profile = appointmentService.getProfessionalProfile("valentina-rojas"); // default or load from repository
-            String profName = profile != null ? (String) profile.get("first_name") + " " + (String) profile.get("last_name") : "Valentina Rojas";
+            Map<String, Object> profile = appointmentService.getProfessionalProfile(slug);
+            String profName = profile != null ? (String) profile.get("first_name") + " " + (String) profile.get("last_name") : "Profesional";
 
             // Load services offered
-            List<Map<String, Object>> activeServices = appointmentService.getServices("valentina-rojas");
+            List<Map<String, Object>> activeServices = appointmentService.getServices(slug);
             StringBuilder servicesStr = new StringBuilder();
             for (Map<String, Object> s : activeServices) {
                 servicesStr.append("- ").append(s.get("name")).append(" (").append(s.get("duration_minutes")).append(" min)\n");
