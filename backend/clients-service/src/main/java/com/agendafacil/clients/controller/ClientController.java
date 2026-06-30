@@ -2,6 +2,7 @@ package com.agendafacil.clients.controller;
 
 import com.agendafacil.clients.model.ClientItem;
 import com.agendafacil.clients.service.ClientCatalogService;
+import com.agendafacil.clients.service.JpaClientCatalogService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,7 +22,10 @@ public class ClientController {
     }
 
     @GetMapping
-    public Collection<ClientItem> findAll() {
+    public Collection<ClientItem> findAll(@RequestHeader(value = "X-Professional-Email", required = false) String email) {
+        if (email != null && catalogService instanceof JpaClientCatalogService) {
+            return ((JpaClientCatalogService) catalogService).findAllByProfessionalEmail(email);
+        }
         return catalogService.findAll();
     }
 
@@ -36,8 +40,13 @@ public class ClientController {
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public ClientItem create(@RequestBody ClientItem item) {
+    public ClientItem create(
+            @RequestBody ClientItem item,
+            @RequestHeader(value = "X-Professional-Email", required = false) String email) {
         item.setId(null);
+        if (email != null && catalogService instanceof JpaClientCatalogService) {
+            return ((JpaClientCatalogService) catalogService).saveByProfessionalEmail(item, email);
+        }
         return catalogService.save(item);
     }
 

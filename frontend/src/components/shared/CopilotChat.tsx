@@ -25,6 +25,14 @@ export default function CopilotChat() {
     scrollToBottom();
   }, [messages, isTyping, isOpen]);
 
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener("open-copilot", handleOpen);
+    return () => {
+      window.removeEventListener("open-copilot", handleOpen);
+    };
+  }, []);
+
   const handleSend = () => {
     if (!input.trim()) return;
     

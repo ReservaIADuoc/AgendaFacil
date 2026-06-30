@@ -47,4 +47,17 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
+    @PutMapping("/profile")
+    public ResponseEntity<User> updateProfile(
+            @RequestHeader("Authorization") String authHeader,
+            @RequestBody Map<String, String> body) {
+        try {
+            String token = authHeader.replace("Bearer ", "");
+            authService.updateProfileByToken(token, body.get("name"), body.get("avatar"));
+            return ResponseEntity.ok(authService.findByToken(token));
+        } catch (IllegalArgumentException ex) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+    }
 }

@@ -1,27 +1,106 @@
 import { Search, Filter, MoreVertical, Mail, Calendar, Clock, Phone, Users, FileText, Paperclip, Bold, Italic, List, Sparkles, Eye } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router";
 import { useToast } from "../../contexts/ToastContext";
+import { useClients, Client } from "../../hooks/useClients";
+import { useClientNotes } from "../../hooks/useClientNotes";
+import { useClientAttachments } from "../../hooks/useClientAttachments";
+import CreateClientModal from "../../components/dashboard/CreateClientModal";
+import { useAuth } from "../../contexts/AuthContext";
 
 const PRIMARY = "#C0987A";
 
-const mockClients = [
-  { id: 1, name: "María García", email: "maria.g@gmail.com", phone: "+56 9 1234 5678", lastAppointment: "12 Jun 2026", status: "Activo", appointments: 4 },
-  { id: 2, name: "Juan Pérez", email: "juan.perez@empresa.com", phone: "+56 9 8765 4321", lastAppointment: "15 Jun 2026", status: "Activo", appointments: 2 },
-  { id: 3, name: "Ana Silva", email: "ana.silva99@hotmail.com", phone: "+56 9 5555 4444", lastAppointment: "02 May 2026", status: "Inactivo", appointments: 1 },
-  { id: 4, name: "Carlos López", email: "clopez@gmail.com", phone: "+56 9 3333 2222", lastAppointment: "18 Jun 2026", status: "Nuevo", appointments: 1 },
-];
-
 export default function ClientsView() {
+  const { clients, addClient, updateClient, deleteClient } = useClients();
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedClient, setSelectedClient] = useState<typeof mockClients[0] | null>(null);
+  const [selectedClient, setSelectedClient] = useState<Client | null>(null);
   const [activeTab, setActiveTab] = useState<"citas" | "notas" | "archivos">("citas");
   const { showToast } = useToast();
+  const [searchParams] = useSearchParams();
+  const [isClientModalOpen, setClientModalOpen] = useState(false);
+  const [clientToEdit, setClientToEdit] = useState<Client | null>(null);
+
+  // Clinical Notes hook – loads notes for the selected client
+  const selectedUuid = selectedClient?.uuid;
+  const { notes, saving, fetchNotes, saveNote } = useClientNotes(selectedUuid);
+
+  // Attachments hook – loads files for the selected client
+  const { attachments, uploading, fetchAttachments, uploadFile, formatSize } = useClientAttachments(selectedUuid);
+
+  // Note editor state
+  const [noteContent, setNoteContent] = useState("");
+
+  // Auto-select client based on URL query parameter
+  useEffect(() => {
+    const selectId = searchParams.get("select");
+    if (selectId && clients.length > 0) {
+      const clientToSelect = clients.find(c => c.id.toString() === selectId);
+      if (clientToSelect) {
+        setSelectedClient(clientToSelect);
+      }
+    }
+  }, [searchParams, clients]);
+
+  // When a client is selected, load their notes and attachments
+  useEffect(() => {
+    if (selectedClient?.uuid) {
+      fetchNotes();
+      fetchAttachments();
+      setNoteContent(""); // Reset editor
+    }
+  }, [selectedClient?.uuid]);
 
   // Toggle para probar la vista vacía vs llena
   const [showEmptyState, setShowEmptyState] = useState(false);
 
-  const activeClients = showEmptyState ? [] : mockClients;
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && selectedClient?.uuid) {
+      const result = await uploadFile(file);
+      if (result) {
+        showToast(`Archivo "${file.name}" guardado exitosamente`, "success");
+      } else {
+        showToast("Error al subir el archivo", "error");
+      }
+      // Reset file input
+      e.target.value = "";
+    }
+  };
+
+  const handleSaveNote = async () => {
+    if (!noteContent.trim()) return;
+    const saved = await saveNote(noteContent);
+    if (saved) {
+      showToast("Nota guardada exitosamente", "success");
+      setNoteContent("");
+    } else {
+      showToast("Error al guardar la nota", "error");
+    }
+  };
+
+  const activeClients = showEmptyState ? [] : clients;
   const filteredClients = activeClients.filter(c => c.name.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  const handleAddClient = (clientData: { name: string; email: string; phone: string }) => {
+    addClient(clientData);
+    showToast("Cliente agregado con éxito", "success");
+  };
+
+  const handleSaveEditedClient = async (editedData: { name: string; email: string; phone: string }) => {
+    if (clientToEdit) {
+      await updateClient(clientToEdit.id, editedData);
+      showToast("Cliente actualizado con éxito", "success");
+      // Update local selected client detail display
+      if (selectedClient && selectedClient.id === clientToEdit.id) {
+        setSelectedClient({
+          ...selectedClient,
+          ...editedData
+        });
+      }
+      setClientToEdit(null);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col h-full bg-background animate-in fade-in duration-300">
@@ -40,7 +119,11 @@ export default function ClientsView() {
           >
             Ver estado {showEmptyState ? 'con datos' : 'vacío'}
           </button>
-          <button className="px-5 py-2.5 rounded-xl font-bold text-white shadow-sm hover:opacity-90 transition-all flex items-center gap-2" style={{ background: PRIMARY }}>
+          <button 
+            onClick={() => setClientModalOpen(true)}
+            className="px-5 py-2.5 rounded-xl font-bold text-white shadow-sm hover:opacity-90 transition-all flex items-center gap-2 cursor-pointer" 
+            style={{ background: PRIMARY }}
+          >
             Añadir Cliente
           </button>
         </div>
@@ -159,7 +242,7 @@ export default function ClientsView() {
                 </p>
                 <button
                   onClick={() => {
-                    navigator.clipboard.writeText("https://agendafacil.com/book/valentina-rojas");
+                    navigator.clipboard.writeText(`${window.location.origin}/book/${user?.usernameSlug || "valentina-rojas"}`);
                     showToast("Enlace de reserva copiado al portapapeles");
                   }}
                   className="px-6 py-3 rounded-xl font-bold text-white shadow-md hover:opacity-90 transition-all flex items-center gap-2" style={{ background: PRIMARY }}
@@ -196,7 +279,28 @@ export default function ClientsView() {
                   <Phone className="w-4 h-4" /> Llamar
                 </button>
               </div>
+              <div className="flex gap-2 mt-2 w-full">
+                <button 
+                  onClick={() => setClientToEdit(selectedClient)}
+                  className="flex-1 py-2 px-4 bg-[#C0987A]/10 hover:bg-[#C0987A]/20 text-[#C0987A] rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  Editar Perfil
+                </button>
+                <button 
+                  onClick={async () => {
+                    if (window.confirm(`¿Estás seguro de que deseas eliminar a ${selectedClient.name}?`)) {
+                      await deleteClient(selectedClient.id);
+                      setSelectedClient(null);
+                      showToast("Cliente eliminado", "success");
+                    }
+                  }}
+                  className="flex-1 py-2 px-4 bg-red-100 hover:bg-red-200 text-red-700 dark:bg-red-950/40 dark:hover:bg-red-900/40 rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  Eliminar
+                </button>
+              </div>
             </div>
+
 
             {/* Tabs */}
             <div className="flex border-b border-border px-6 pt-4">
@@ -253,8 +357,8 @@ export default function ClientsView() {
               )}
 
               {activeTab === 'notas' && (
-                <div className="h-full flex flex-col animate-in fade-in">
-                  <div className="flex items-center justify-between mb-4">
+                <div className="h-full flex flex-col gap-4 animate-in fade-in">
+                  <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Notas de Evolución</h3>
                     <button
                       onClick={() => showToast("La IA está resumiendo el historial del paciente...")}
@@ -265,8 +369,23 @@ export default function ClientsView() {
                     </button>
                   </div>
 
-                  {/* Editor simulado */}
-                  <div className="flex-1 border border-border rounded-xl bg-background flex flex-col overflow-hidden min-h-[200px]">
+                  {/* Previous notes history */}
+                  {notes.length > 0 && (
+                    <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
+                      {notes.map((note) => (
+                        <div key={note.id} className="border border-border rounded-xl p-3 bg-muted/20">
+                          <p className="text-xs text-foreground whitespace-pre-wrap line-clamp-3">{note.contentMarkdown}</p>
+                          <p className="text-[10px] text-muted-foreground mt-1">
+                            {new Date(note.createdAt).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                            {note.isAiAssisted && <span className="ml-2 text-[#C0987A]">✦ IA</span>}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* New note editor */}
+                  <div className="flex-1 border border-border rounded-xl bg-background flex flex-col overflow-hidden min-h-[150px]">
                     <div className="flex border-b border-border bg-muted/50 p-2 gap-1">
                       <button className="p-1.5 hover:bg-muted rounded text-muted-foreground hover:text-foreground"><Bold className="w-4 h-4" /></button>
                       <button className="p-1.5 hover:bg-muted rounded text-muted-foreground hover:text-foreground"><Italic className="w-4 h-4" /></button>
@@ -275,30 +394,67 @@ export default function ClientsView() {
                     <textarea
                       className="flex-1 w-full p-4 bg-transparent outline-none text-sm text-foreground resize-none"
                       placeholder="Escribe tus observaciones clínicas aquí..."
-                      defaultValue={"Paciente reporta mejoría en episodios de ansiedad. Se trabajó en técnicas de respiración diafragmática.\n\nPróxima sesión:\n- Revisar bitácora de emociones.\n- Continuar con exposición progresiva."}
+                      value={noteContent}
+                      onChange={(e) => setNoteContent(e.target.value)}
                     />
                   </div>
-                  <div className="mt-4 flex justify-end">
+                  <div className="flex justify-end">
                     <button
-                      onClick={() => showToast("Notas guardadas exitosamente")}
-                      className="px-4 py-2 bg-primary hover:opacity-90 text-primary-foreground text-sm font-bold rounded-lg transition-opacity"
+                      onClick={handleSaveNote}
+                      disabled={saving || !noteContent.trim()}
+                      className="px-4 py-2 bg-primary hover:opacity-90 text-primary-foreground text-sm font-bold rounded-lg transition-opacity disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                      Guardar Notas
+                      {saving ? "Guardando..." : "Guardar Nota"}
                     </button>
                   </div>
                 </div>
               )}
 
               {activeTab === 'archivos' && (
-                <div className="animate-in fade-in text-center py-10">
-                  <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center text-muted-foreground mx-auto mb-4">
-                    <Paperclip className="w-8 h-8" />
+                <div className="animate-in fade-in py-4 space-y-4">
+                  <div className="flex justify-between items-center pb-2 border-b border-border">
+                    <h4 className="font-bold text-foreground text-sm">Archivos del Paciente</h4>
+                    <button
+                      onClick={() => document.getElementById("client-file-input")?.click()}
+                      disabled={uploading}
+                      className="text-primary text-xs font-bold hover:underline cursor-pointer bg-transparent border-none outline-none disabled:opacity-50"
+                    >
+                      {uploading ? "Subiendo..." : "+ Subir Archivo"}
+                    </button>
                   </div>
-                  <h4 className="font-bold text-foreground mb-1">Sin archivos adjuntos</h4>
-                  <p className="text-sm text-muted-foreground mb-4">Sube exámenes, consentimientos o imágenes de este paciente.</p>
-                  <button className="text-primary text-sm font-bold hover:underline">
-                    Subir Archivo
-                  </button>
+
+                  {attachments.length === 0 ? (
+                    <div className="text-center py-10">
+                      <div className="w-16 h-16 bg-muted rounded-full flex items-center justify-center text-muted-foreground mx-auto mb-4">
+                        <Paperclip className="w-8 h-8" />
+                      </div>
+                      <h4 className="font-bold text-foreground mb-1">Sin archivos adjuntos</h4>
+                      <p className="text-sm text-muted-foreground mb-4">Sube exámenes, consentimientos o imágenes de este paciente.</p>
+                      <button
+                        onClick={() => document.getElementById("client-file-input")?.click()}
+                        className="text-primary text-sm font-bold hover:underline cursor-pointer bg-transparent border-none outline-none"
+                      >
+                        Subir Archivo
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1">
+                      {attachments.map((file) => (
+                        <div key={file.id} className="flex items-center justify-between p-3 bg-muted/40 rounded-xl border border-border">
+                          <div className="flex items-center gap-3">
+                            <Paperclip className="w-4 h-4 text-[#C0987A]" />
+                            <div className="text-left">
+                              <div className="text-xs font-bold text-foreground truncate max-w-[160px]">{file.originalFilename}</div>
+                              <div className="text-[10px] text-muted-foreground">
+                                {new Date(file.uploadedAt).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric" })}
+                              </div>
+                            </div>
+                          </div>
+                          <span className="text-[10px] font-bold text-muted-foreground">{formatSize(file.fileSizeBytes)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -307,6 +463,20 @@ export default function ClientsView() {
         )}
 
       </div>
+      <CreateClientModal isOpen={isClientModalOpen} onClose={() => setClientModalOpen(false)} onSave={handleAddClient} />
+      <CreateClientModal 
+        isOpen={clientToEdit !== null} 
+        onClose={() => setClientToEdit(null)} 
+        onSave={handleSaveEditedClient} 
+        client={clientToEdit} 
+      />
+      <input
+        type="file"
+        id="client-file-input"
+        className="hidden"
+        onChange={handleFileUpload}
+        accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+      />
     </div>
   );
 }

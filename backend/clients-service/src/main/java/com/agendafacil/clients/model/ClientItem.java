@@ -4,6 +4,7 @@ package com.agendafacil.clients.model;
 public class ClientItem {
 
     private Long id;
+    private String uuid;
     private String name;
     private String email;
     private String phone;
@@ -24,6 +25,14 @@ public class ClientItem {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getName() {

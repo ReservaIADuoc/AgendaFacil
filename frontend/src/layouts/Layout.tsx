@@ -3,12 +3,14 @@ import { Link, Outlet } from "react-router";
 import CopilotChat from "../components/shared/CopilotChat";
 import { Calendar, Menu, X, Sun, Moon } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
+import { useAuth } from "../contexts/AuthContext";
 
 const PRIMARY = "#C0987A";
 
 function Nav() {
   const [open, setOpen] = useState(false);
   const { theme, toggleTheme } = useTheme();
+  const { token } = useAuth();
 
   return (
     <header className="fixed top-4 left-0 right-0 z-50 px-4 flex justify-center">
@@ -30,14 +32,26 @@ function Nav() {
           <button onClick={toggleTheme} className="p-2 hover:bg-muted rounded-xl transition-colors text-muted-foreground hover:text-foreground">
             {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
           </button>
-          <Link to="/login" className="text-[13px] font-semibold text-foreground hover:opacity-70 transition-colors ml-2">Iniciar sesión</Link>
-          <Link
-            to="/register"
-            className="px-4 py-2 rounded-xl text-[13px] font-bold text-white transition-all hover:opacity-90 shadow-sm"
-            style={{ background: PRIMARY }}
-          >
-            Empezar gratis
-          </Link>
+          {token ? (
+            <Link
+              to="/dashboard"
+              className="px-4 py-2 rounded-xl text-[13px] font-bold text-white transition-all hover:opacity-90 shadow-sm"
+              style={{ background: PRIMARY }}
+            >
+              Ir al Panel de Control
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" className="text-[13px] font-semibold text-foreground hover:opacity-70 transition-colors ml-2">Iniciar sesión</Link>
+              <Link
+                to="/register"
+                className="px-4 py-2 rounded-xl text-[13px] font-bold text-white transition-all hover:opacity-90 shadow-sm"
+                style={{ background: PRIMARY }}
+              >
+                Empezar gratis
+              </Link>
+            </>
+          )}
         </div>
         <div className="flex md:hidden items-center gap-2">
           <button onClick={toggleTheme} className="p-2 text-muted-foreground">
@@ -53,10 +67,18 @@ function Nav() {
           <Link to="/features" onClick={() => setOpen(false)} className="block text-[14px] font-medium text-foreground py-1">Funciones</Link>
           <Link to="/pricing" onClick={() => setOpen(false)} className="block text-[14px] font-medium text-foreground py-1">Precios</Link>
           <Link to="/testimonials" onClick={() => setOpen(false)} className="block text-[14px] font-medium text-foreground py-1">Testimonios</Link>
-          <Link to="/login" onClick={() => setOpen(false)} className="block text-[14px] font-medium text-foreground py-1">Iniciar sesión</Link>
-          <Link to="/register" onClick={() => setOpen(false)} className="flex justify-center w-full py-3 rounded-xl text-[14px] font-bold text-white" style={{ background: PRIMARY }}>
-            Empezar gratis
-          </Link>
+          {token ? (
+            <Link to="/dashboard" onClick={() => setOpen(false)} className="flex justify-center w-full py-3 rounded-xl text-[14px] font-bold text-white" style={{ background: PRIMARY }}>
+              Ir al Panel de Control
+            </Link>
+          ) : (
+            <>
+              <Link to="/login" onClick={() => setOpen(false)} className="block text-[14px] font-medium text-foreground py-1">Iniciar sesión</Link>
+              <Link to="/register" onClick={() => setOpen(false)} className="flex justify-center w-full py-3 rounded-xl text-[14px] font-bold text-white" style={{ background: PRIMARY }}>
+                Empezar gratis
+              </Link>
+            </>
+          )}
         </div>
       )}
     </header>
@@ -88,9 +110,20 @@ function Footer() {
             <div key={col.title}>
               <h4 className="text-[12px] font-bold text-primary opacity-80 uppercase tracking-widest mb-3">{col.title}</h4>
               <ul className="space-y-2">
-                {col.links.map(l => (
-                  <li key={l}><a href="#" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{l}</a></li>
-                ))}
+                {col.links.map(l => {
+                  let path = "#";
+                  if (l === "Funciones") path = "/features";
+                  if (l === "Precios") path = "/pricing";
+                  return (
+                    <li key={l}>
+                      {path === "#" ? (
+                        <a href="#" className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{l}</a>
+                      ) : (
+                        <Link to={path} className="text-[13px] text-muted-foreground hover:text-foreground transition-colors">{l}</Link>
+                      )}
+                    </li>
+                  );
+                })}
               </ul>
             </div>
           ))}

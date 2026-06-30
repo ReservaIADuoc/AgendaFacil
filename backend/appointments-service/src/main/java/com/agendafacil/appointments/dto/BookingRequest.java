@@ -6,6 +6,7 @@ public class BookingRequest {
     private String serviceId;
     private String clientName;
     private String clientEmail;
+    private String phone;
     private String date; // yyyy-MM-dd
     private String time; // HH:mm
 
@@ -20,6 +21,8 @@ public class BookingRequest {
     public void setClientName(String clientName) { this.clientName = clientName; }
     public String getClientEmail() { return clientEmail; }
     public void setClientEmail(String clientEmail) { this.clientEmail = clientEmail; }
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
     public String getDate() { return date; }
     public void setDate(String date) { this.date = date; }
     public String getTime() { return time; }

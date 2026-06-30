@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 public class ServiceItem {
 
     private Long id;
+    private String uuid;
     private String name;
     private String description;
     private BigDecimal price;
@@ -32,6 +33,14 @@ public class ServiceItem {
 
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public String getUuid() {
+        return uuid;
+    }
+
+    public void setUuid(String uuid) {
+        this.uuid = uuid;
     }
 
     public String getName() {
@@ -64,5 +73,24 @@ public class ServiceItem {
 
     public void setDurationMinutes(Integer durationMinutes) {
         this.durationMinutes = durationMinutes;
+    }
+
+    private Boolean active = true;
+    private String modality;
+
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+    public String getModality() {
+        return modality;
+    }
+
+    public void setModality(String modality) {
+        this.modality = modality;
     }
 }

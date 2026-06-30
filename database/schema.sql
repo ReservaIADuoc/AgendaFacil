@@ -613,24 +613,6 @@ INSERT INTO services (id, professional_id, name, description, duration_minutes, 
 -- ---- CLIENTES ----
 INSERT INTO clients (id, professional_id, first_name, last_name, email, phone, birth_date, status) VALUES
   (
-    'c1d2e3f4-0003-0003-0003-000000000001',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'María', 'García', 'maria.g@gmail.com', '+56 9 1234 5678',
-    '1990-04-15', 'ACTIVE'
-  ),
-  (
-    'c1d2e3f4-0003-0003-0003-000000000002',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'Juan', 'Pérez', 'juan.perez@empresa.com', '+56 9 8765 4321',
-    '1985-11-28', 'ACTIVE'
-  ),
-  (
-    'c1d2e3f4-0003-0003-0003-000000000003',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'Ana', 'Silva', 'ana.silva99@hotmail.com', '+56 9 5555 4444',
-    '1998-07-02', 'INACTIVE'
-  ),
-  (
     'c1d2e3f4-0003-0003-0003-000000000004',
     'a1b2c3d4-0001-0001-0001-000000000001',
     'Carlos', 'López', 'clopez@gmail.com', '+56 9 3333 2222',
@@ -638,72 +620,8 @@ INSERT INTO clients (id, professional_id, first_name, last_name, email, phone, b
   );
 
 -- ---- CITAS (Simulando flujo real de estado) ----
--- Citas pasadas completadas
 INSERT INTO appointments (id, professional_id, client_id, service_id, start_at, end_at, status, payment_status, client_notes, ai_noshow_score)
 VALUES
-  (
-    'd1e2f3a4-0004-0004-0004-000000000001',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'c1d2e3f4-0003-0003-0003-000000000001',
-    'b1c2d3e4-0002-0002-0002-000000000001',
-    NOW() - INTERVAL '30 days', NOW() - INTERVAL '30 days' + INTERVAL '1 hour',
-    'COMPLETED', 'PAID',
-    'Primera sesión. Problema principal: ansiedad laboral.',
-    0.12
-  ),
-  (
-    'd1e2f3a4-0004-0004-0004-000000000002',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'c1d2e3f4-0003-0003-0003-000000000001',
-    'b1c2d3e4-0002-0002-0002-000000000001',
-    NOW() - INTERVAL '20 days', NOW() - INTERVAL '20 days' + INTERVAL '1 hour',
-    'COMPLETED', 'PAID', NULL, 0.08
-  ),
-  (
-    'd1e2f3a4-0004-0004-0004-000000000003',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'c1d2e3f4-0003-0003-0003-000000000002',
-    'b1c2d3e4-0002-0002-0002-000000000002',
-    NOW() - INTERVAL '15 days', NOW() - INTERVAL '15 days' + INTERVAL '90 minutes',
-    'COMPLETED', 'PAID', 'Sesión inicial de pareja.', 0.05
-  ),
-  -- Cita con inasistencia (No Show) → dato útil para la IA predictiva
-  (
-    'd1e2f3a4-0004-0004-0004-000000000004',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'c1d2e3f4-0003-0003-0003-000000000003',
-    'b1c2d3e4-0002-0002-0002-000000000001',
-    NOW() - INTERVAL '10 days', NOW() - INTERVAL '10 days' + INTERVAL '1 hour',
-    'NO_SHOW', 'UNPAID', NULL, 0.72
-  ),
-  -- Cita cancelada por el cliente
-  (
-    'd1e2f3a4-0004-0004-0004-000000000005',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'c1d2e3f4-0003-0003-0003-000000000003',
-    'b1c2d3e4-0002-0002-0002-000000000003',
-    NOW() - INTERVAL '5 days', NOW() - INTERVAL '5 days' + INTERVAL '45 minutes',
-    'CANCELLED_BY_CLIENT', 'UNPAID', NULL, 0.65
-  ),
-  -- Citas futuras (próximas en agenda)
-  (
-    'd1e2f3a4-0004-0004-0004-000000000006',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'c1d2e3f4-0003-0003-0003-000000000001',
-    'b1c2d3e4-0002-0002-0002-000000000001',
-    NOW() + INTERVAL '1 day' + INTERVAL '10 hours',
-    NOW() + INTERVAL '1 day' + INTERVAL '11 hours',
-    'CONFIRMED', 'UNPAID', NULL, 0.10
-  ),
-  (
-    'd1e2f3a4-0004-0004-0004-000000000007',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'c1d2e3f4-0003-0003-0003-000000000002',
-    'b1c2d3e4-0002-0002-0002-000000000002',
-    NOW() + INTERVAL '2 days' + INTERVAL '14 hours',
-    NOW() + INTERVAL '2 days' + INTERVAL '15 hours' + INTERVAL '30 minutes',
-    'CONFIRMED', 'UNPAID', 'Segunda sesión de pareja.', 0.09
-  ),
   (
     'd1e2f3a4-0004-0004-0004-000000000008',
     'a1b2c3d4-0001-0001-0001-000000000001',
@@ -715,66 +633,10 @@ VALUES
   );
 
 -- ---- NOTAS CLÍNICAS ----
-INSERT INTO clinical_notes (client_id, professional_id, appointment_id, content_markdown, is_ai_assisted, version)
-VALUES
-  (
-    'c1d2e3f4-0003-0003-0003-000000000001',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'd1e2f3a4-0004-0004-0004-000000000001',
-    E'## Sesión #1 – María García\n\n**Motivo de consulta:** Ansiedad laboral, dificultad para desconectarse del trabajo.\n\n**Observaciones:**\n- Presenta síntomas de ansiedad generalizada.\n- Reporta insomnio 3 veces por semana.\n- Buen insight y motivación al cambio.\n\n**Plan:** Iniciar registro de pensamientos automáticos. Técnica de respiración diafragmática.',
-    FALSE, 1
-  ),
-  (
-    'c1d2e3f4-0003-0003-0003-000000000001',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'd1e2f3a4-0004-0004-0004-000000000002',
-    E'## Sesión #2 – María García\n\n**Progreso:** Completó el registro de pensamientos durante la semana.\n\n**Observaciones:**\n- Identifica mejor sus disparadores de ansiedad (reuniones de lunes).\n- El insomnio ha disminuido a 1 vez por semana.\n\n**Plan:** Continuar TCC. Introducir técnica de reestructuración cognitiva.',
-    FALSE, 1
-  ),
-  (
-    'c1d2e3f4-0003-0003-0003-000000000002',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'd1e2f3a4-0004-0004-0004-000000000003',
-    E'## Sesión Inicial – Juan & Pareja\n\n**Motivo de consulta:** Problemas de comunicación. Discusiones frecuentes sobre finanzas.\n\n**Observaciones:**\n- Ambos expresan querer mejorar la relación.\n- Se identifican patrones de comunicación defensiva.\n\n**Plan:** Psicoeducación sobre estilos de comunicación. Ejercicio de escucha activa.',
-    FALSE, 1
-  );
+-- (Sin notas por defecto; las notas se crean de manera dinámica)
 
--- ---- ARCHIVOS ADJUNTOS (METADATA SIMULADA) ----
-INSERT INTO attachments (client_id, professional_id, appointment_id, original_filename, storage_key, mime_type, file_size_bytes, category, description)
-VALUES
-  (
-    'c1d2e3f4-0003-0003-0003-000000000001',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'd1e2f3a4-0004-0004-0004-000000000001',
-    'consentimiento_informado_maria.pdf',
-    'professionals/a1b2c3d4/clients/c1d2e3f4-0001/2026-05-12-consentimiento_informado_maria.pdf',
-    'application/pdf',
-    245820,
-    'CONSENT_FORM',
-    'Consentimiento informado firmado en primera sesión.'
-  ),
-  (
-    'c1d2e3f4-0003-0003-0003-000000000001',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    NULL,
-    'derivacion_dr_morales.pdf',
-    'professionals/a1b2c3d4/clients/c1d2e3f4-0001/2026-05-10-derivacion_dr_morales.pdf',
-    'application/pdf',
-    118400,
-    'CLINICAL_RECORD',
-    'Derivación desde médico de cabecera.'
-  ),
-  (
-    'c1d2e3f4-0003-0003-0003-000000000002',
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    NULL,
-    'foto_informacion.jpg',
-    'professionals/a1b2c3d4/clients/c1d2e3f4-0002/2026-05-20-foto_informacion.jpg',
-    'image/jpeg',
-    892100,
-    'OTHER',
-    'Imagen enviada por el cliente como referencia.'
-  );
+-- ---- ARCHIVOS ADJUNTOS ----
+-- (Sin adjuntos por defecto; se suben de manera dinámica)
 
 -- ---- NOTIFICACIONES ----
 INSERT INTO notifications (professional_id, related_entity_id, type, title, message, is_read) VALUES
@@ -786,30 +648,6 @@ INSERT INTO notifications (professional_id, related_entity_id, type, title, mess
     'Carlos López ha agendado "Evaluación Inicial" para el ' ||
       TO_CHAR((NOW() + INTERVAL '3 days' + INTERVAL '9 hours') AT TIME ZONE 'America/Santiago', 'DD/MM HH24:MI'),
     FALSE
-  ),
-  (
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'd1e2f3a4-0004-0004-0004-000000000005',
-    'CANCELLATION',
-    'Cita Cancelada',
-    'Ana Silva canceló su cita de Evaluación Inicial.',
-    FALSE
-  ),
-  (
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    NULL,
-    'REMINDER',
-    'Recordatorio del día',
-    'Tienes 3 citas confirmadas para mañana.',
-    TRUE
-  ),
-  (
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    'c1d2e3f4-0003-0003-0003-000000000001',
-    'NEW_CLIENT',
-    'Nuevo Cliente',
-    'María García se ha registrado en tu portal de reservas.',
-    TRUE
   );
 
 -- ---- INTERACCIÓN CON LA IA (Simulación del Copilot) ----
@@ -817,20 +655,10 @@ INSERT INTO ai_interactions (professional_id, session_id, intent, user_message, 
   (
     'a1b2c3d4-0001-0001-0001-000000000001',
     gen_random_uuid(),
-    'SUMMARIZE_NOTES',
-    'Resúmeme el historial clínico de María García antes de la siguiente sesión.',
-    'Resumen del historial de María García: Presenta ansiedad laboral y ha progresado significativamente en 2 sesiones. El insomnio se redujo de 3 a 1 episodio semanal. Identifica sus disparadores. Plan actual: reestructuración cognitiva (TCC).',
-    412,
-    'SUMMARIZE_NOTES',
-    'c1d2e3f4-0003-0003-0003-000000000001'
-  ),
-  (
-    'a1b2c3d4-0001-0001-0001-000000000001',
-    gen_random_uuid(),
     'GENERATE_INSIGHTS',
     'Analiza mis analíticas de este mes y dame un insight.',
-    'Este mes tuviste 2 inasistencias (No Show) de 8 citas, ambas de Ana Silva (cliente inactiva). Tu tasa de asistencia es del 75%. Recomendación: enviar recordatorio automático 24 horas antes para clientes con historial de cancelaciones.',
-    589,
+    'Este mes has tenido citas activas y un registro de pacientes limpio. Tu tasa de asistencia es del 100%.',
+    210,
     NULL,
     NULL
   );
