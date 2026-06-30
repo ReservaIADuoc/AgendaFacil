@@ -67,4 +67,22 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
         ORDER BY a.start_at
         """, nativeQuery = true)
     List<Object[]> findEnrichedByProfessionalId(@Param("profId") UUID professionalId);
+
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Modifying
+    @Query(value = "INSERT INTO ai_interactions (id, professional_id, session_id, intent, user_message, ai_response, action_taken, action_entity_id, created_at) " +
+                   "VALUES (gen_random_uuid(), :profId, :sessionId, CAST(:intent AS ai_intent), :userMsg, :aiResp, :actionTaken, :actionEntityId, NOW())", nativeQuery = true)
+    void saveAiInteraction(@Param("profId") UUID professionalId,
+                            @Param("sessionId") UUID sessionId,
+                            @Param("intent") String intent,
+                            @Param("userMsg") String userMessage,
+                            @Param("aiResp") String aiResponse,
+                            @Param("actionTaken") String actionTaken,
+                            @Param("actionEntityId") UUID actionEntityId);
+
+    @Query(value = "SELECT CAST(id AS VARCHAR) FROM clients WHERE professional_id = :profId AND LOWER(TRIM(first_name || ' ' || last_name)) = LOWER(TRIM(:name)) LIMIT 1", nativeQuery = true)
+    java.util.Optional<String> findClientIdByName(@Param("profId") UUID professionalId, @Param("name") String name);
+
+    @Query(value = "SELECT CAST(id AS VARCHAR), duration_minutes FROM services WHERE professional_id = :profId AND LOWER(TRIM(name)) = LOWER(TRIM(:name)) AND is_active = true LIMIT 1", nativeQuery = true)
+    List<Object[]> findServiceByName(@Param("profId") UUID professionalId, @Param("name") String name);
 }

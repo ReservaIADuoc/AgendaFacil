@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { Sparkles, X, Send, User, Calendar, Check } from "lucide-react";
+import { useAuth, API_BASE_URL } from "../../contexts/AuthContext";
 
 type Message = {
   id: number;
@@ -10,13 +11,14 @@ type Message = {
 
 export default function CopilotChat() {
   const [isOpen, setIsOpen] = useState(false);
-  const [apiKey, setApiKey] = useState(localStorage.getItem("gemini_api_key") || "");
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([
     { id: 1, role: "ai", text: "Hola, soy tu asistente de Inteligencia Artificial de Agenda Fácil. ¿En qué te puedo ayudar hoy?" }
   ]);
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { token } = useAuth();
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -25,12 +27,6 @@ export default function CopilotChat() {
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping, isOpen]);
-
-  useEffect(() => {
-    if (isOpen) {
-      setApiKey(localStorage.getItem("gemini_api_key") || "");
-    }
-  }, [isOpen]);
 
   useEffect(() => {
     const handleOpen = () => setIsOpen(true);
@@ -48,66 +44,38 @@ export default function CopilotChat() {
     setInput("");
     setIsTyping(true);
 
-    const activeKey = apiKey || localStorage.getItem("gemini_api_key") || "";
-
-    if (!activeKey) {
-      setTimeout(() => {
-        setIsTyping(false);
-        setMessages(prev => [
-          ...prev,
-          {
-            id: Date.now() + 1,
-            role: "ai",
-            text: "⚠️ Para poder usar la Inteligencia Artificial real, por favor ingresa tu Gemini API Key en la sección de 'Ajustes > Integraciones' de tu Panel de Control o usa las respuestas de prueba de demostración.\n\nSugerencia de prueba: 'Entendido. Según tu disponibilidad, el próximo espacio libre es el Jueves a las 15:00 hrs para Terapia. ¿Deseas que lo reserve por ti?'",
-            isActionCard: true
-          }
-        ]);
-      }, 1000);
-      return;
-    }
-
     try {
-      const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${activeKey}`;
-      
-      const contents = messages.map(msg => ({
-        role: msg.role === 'user' ? 'user' : 'model',
-        parts: [{ text: msg.text }]
-      }));
-      
-      contents.push({
-        role: 'user',
-        parts: [{ text: input }]
-      });
-
-      const systemInstruction = {
-        parts: [{
-          text: "Eres el Copiloto IA de Agenda Fácil, una aplicación moderna de gestión de citas para profesionales independientes (psicólogos, coaches, fisioterapeutas, médicos, etc.). Eres un asistente útil y amigable. Ayuda al profesional a organizar su agenda, responder dudas sobre su negocio, redactar recordatorios o mensajes para clientes, estructurar notas de citas y proponer mejoras en su agenda. Sé muy breve, amigable y responde siempre en español. No utilices formato markdown complejo, solo texto simple, saltos de línea y emojis."
-        }]
-      };
-
-      const response = await fetch(url, {
+      const response = await fetch(`${API_BASE_URL}/appointments/ai/chat`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
+          ...(token ? { "Authorization": `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
-          contents,
-          systemInstruction
+          message: input,
+          sessionId: sessionId,
+          history: messages.map(msg => ({
+            role: msg.role === 'user' ? 'user' : 'model',
+            text: msg.text
+          }))
         })
       });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData?.error?.message || `Error HTTP: ${response.status}`);
+        throw new Error(errorData?.error || `Error HTTP: ${response.status}`);
       }
 
       const data = await response.json();
-      const text = data.candidates?.[0]?.content?.parts?.[0]?.text || "No se pudo obtener una respuesta.";
+      const text = data.response || "No se pudo obtener una respuesta.";
       
+      if (data.sessionId) {
+        setSessionId(data.sessionId);
+      }
+
       setIsTyping(false);
-      
-      const lowercaseText = text.toLowerCase();
-      const isAction = lowercaseText.includes("cita") || lowercaseText.includes("hora") || lowercaseText.includes("reservar") || lowercaseText.includes("agendar");
+
+      const isAction = data.actionTaken === "SCHEDULE_APPOINTMENT";
 
       setMessages(prev => [
         ...prev,
@@ -118,6 +86,12 @@ export default function CopilotChat() {
           isActionCard: isAction
         }
       ]);
+
+      // If an appointment was scheduled, trigger update of the calendar/dashboard
+      if (isAction) {
+        window.dispatchEvent(new CustomEvent("appointment-created"));
+      }
+
     } catch (error: any) {
       console.error("Gemini API Error:", error);
       setIsTyping(false);
@@ -126,7 +100,7 @@ export default function CopilotChat() {
         {
           id: Date.now() + 1,
           role: "ai",
-          text: `❌ Error al conectar con Gemini: ${error?.message || "Error desconocido"}. Por favor verifica tu API Key.`
+          text: `❌ Error al conectar con el Asistente de IA: ${error?.message || "Error desconocido"}.`
         }
       ]);
     }
