@@ -437,7 +437,7 @@ public class AiChatController {
     }
 
     private String callGeminiWithInstruction(String userMessage, List<Map<String, Object>> history, String systemInstructionText) throws Exception {
-        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=" + geminiApiKey;
+        String url = "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + geminiApiKey;
 
         List<Map<String, Object>> contents = new ArrayList<>();
 
