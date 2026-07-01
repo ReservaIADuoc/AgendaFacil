@@ -88,4 +88,23 @@ public interface AppointmentRepository extends JpaRepository<Appointment, UUID> 
 
     @Query(value = "SELECT CAST(id AS VARCHAR), duration_minutes FROM services WHERE professional_id = :profId AND LOWER(TRIM(name)) = LOWER(TRIM(:name)) AND is_active = true LIMIT 1", nativeQuery = true)
     List<Object[]> findServiceByName(@Param("profId") UUID professionalId, @Param("name") String name);
+
+    @Query(value = "SELECT CAST(a.id AS VARCHAR) FROM appointments a " +
+                   "JOIN clients c ON c.id = a.client_id " +
+                   "WHERE a.professional_id = :profId " +
+                   "AND LOWER(TRIM(c.first_name || ' ' || c.last_name)) = LOWER(TRIM(:clientName)) " +
+                   "AND a.start_at >= :start AND a.start_at < :end " +
+                   "AND a.status NOT IN ('CANCELLED_BY_CLIENT', 'CANCELLED_BY_PROFESSIONAL') LIMIT 1", nativeQuery = true)
+    java.util.Optional<String> findAppointmentByClientAndDateRange(@Param("profId") UUID professionalId, @Param("clientName") String clientName, @Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end);
+
+    @Query(value = "SELECT CAST(id AS VARCHAR) FROM appointments " +
+                   "WHERE professional_id = :profId " +
+                   "AND start_at >= :start AND start_at < :end " +
+                   "AND status NOT IN ('CANCELLED_BY_CLIENT', 'CANCELLED_BY_PROFESSIONAL') LIMIT 1", nativeQuery = true)
+    java.util.Optional<String> findAppointmentByDateRange(@Param("profId") UUID professionalId, @Param("start") OffsetDateTime start, @Param("end") OffsetDateTime end);
+
+    @org.springframework.transaction.annotation.Transactional
+    @org.springframework.data.jpa.repository.Modifying
+    @Query(value = "UPDATE appointments SET status = CAST(:status AS appointment_status) WHERE id = :id", nativeQuery = true)
+    void updateAppointmentStatus(@Param("id") UUID id, @Param("status") String status);
 }
