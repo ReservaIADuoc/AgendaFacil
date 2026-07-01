@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { useAuth, API_BASE_URL } from "../contexts/AuthContext";
 
 export interface ClinicalNote {
@@ -19,6 +19,7 @@ export function useClientNotes(clientUuid: string | undefined) {
   const fetchNotes = useCallback(async () => {
     if (!clientUuid || !token) return;
     setLoading(true);
+    setNotes([]); // Clear before fetching
     try {
       const res = await fetch(`${API_BASE_URL}/clients/${clientUuid}/notes`, {
         headers: { Authorization: `Bearer ${token}` },
@@ -48,7 +49,12 @@ export function useClientNotes(clientUuid: string | undefined) {
       });
       if (res.ok) {
         const saved: ClinicalNote = await res.json();
-        setNotes((prev) => [saved, ...prev]);
+        console.log("Note saved from backend:", saved);
+        setNotes((prev) => {
+          const newNotes = [saved, ...prev];
+          console.log("New notes array:", newNotes);
+          return newNotes;
+        });
         return saved;
       }
     } catch (e) {

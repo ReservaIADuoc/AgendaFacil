@@ -35,7 +35,7 @@ public class UserEntity {
     @Column(name = "bio", columnDefinition = "text")
     private String bio;
 
-    @Column(name = "avatar_key", length = 500)
+    @Column(name = "avatar_key", columnDefinition = "text")
     private String avatarKey;
 
     @Column(name = "specialty", length = 200)

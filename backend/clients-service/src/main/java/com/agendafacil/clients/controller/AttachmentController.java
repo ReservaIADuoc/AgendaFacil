@@ -69,4 +69,28 @@ public class AttachmentController {
             return ResponseEntity.badRequest().build();
         }
     }
+
+    @GetMapping("/{attachmentId}/download")
+    public ResponseEntity<Map<String, String>> download(
+            @PathVariable String clientUuid,
+            @PathVariable String attachmentId) {
+        try {
+            UUID clientId = UUID.fromString(clientUuid);
+            UUID attId = UUID.fromString(attachmentId);
+            AttachmentEntity entity = repo.findById(attId)
+                    .orElseThrow(() -> new IllegalArgumentException("Attachment not found"));
+            
+            if (!entity.getClientId().equals(clientId)) {
+                return ResponseEntity.badRequest().build();
+            }
+            
+            return ResponseEntity.ok(Map.of(
+                "filename", entity.getOriginalFilename(),
+                "mimeType", entity.getMimeType(),
+                "contentBase64", entity.getContentBase64()
+            ));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

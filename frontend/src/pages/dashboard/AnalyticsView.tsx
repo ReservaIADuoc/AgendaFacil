@@ -4,6 +4,8 @@ import {
   ChevronRight, Star, Clock
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import ReactMarkdown from "react-markdown";
+import { useAuth, API_BASE_URL } from "../../contexts/AuthContext";
 import { useToast } from "../../contexts/ToastContext";
 import { useAppointments } from "../../hooks/useAppointments";
 import { useClients } from "../../hooks/useClients";
@@ -13,6 +15,7 @@ const PRIMARY = "#C0987A";
 const ACCENT = "#A9B3A2";
 
 export default function AnalyticsView() {
+  const { token } = useAuth();
   const { showToast } = useToast();
   const { events } = useAppointments();
   const { clients } = useClients();
@@ -20,7 +23,29 @@ export default function AnalyticsView() {
 
   const [isLoading, setIsLoading] = useState(true);
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
+  const [aiReport, setAiReport] = useState<string | null>(null);
+  const [isAiLoading, setIsAiLoading] = useState(false);
   const [activeRange, setActiveRange] = useState<"week" | "month" | "year">("month");
+
+  const fetchInsights = async () => {
+    setIsInsightsOpen(true);
+    if (aiReport || isAiLoading || !token) return;
+
+    setIsAiLoading(true);
+    try {
+      const response = await fetch(`${API_BASE_URL}/appointments/ai/analytics/monthly`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error("Error fetching AI Insights");
+      const data = await response.json();
+      setAiReport(data.report || "No se generó el reporte.");
+    } catch (e) {
+      console.error(e);
+      showToast("Hubo un error al generar los insights", "error");
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
 
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
@@ -236,7 +261,7 @@ export default function AnalyticsView() {
           </div>
 
           <button
-            onClick={() => setIsInsightsOpen(true)}
+            onClick={fetchInsights}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer border"
             style={{ color: PRIMARY, background: `${PRIMARY}15`, borderColor: `${PRIMARY}30` }}
           >
@@ -601,35 +626,24 @@ export default function AnalyticsView() {
             </div>
 
             <div className="p-6 space-y-3 max-h-[60vh] overflow-y-auto">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Análisis generado a partir de <strong className="text-foreground">{filteredEvents.length} citas</strong> del rango seleccionado ({activeRange === "week" ? "Semana" : activeRange === "month" ? "Mes" : "Año"}):
+              <p className="text-sm text-muted-foreground leading-relaxed mb-4">
+                Análisis generado por <strong className="text-foreground">Copiloto IA</strong> en base a las citas del mes:
               </p>
 
-              {[
-                {
-                  title: "💰 Rendimiento Financiero",
-                  body: `Tus ingresos estimados del período son ${totalRevenueFormatted} en ${filteredEvents.length} sesiones. ${filteredEvents.length > 2 ? "¡Excelente actividad! Considera implementar una política de pago anticipado para reducir ausencias." : "Puedes incrementar tus ingresos agendando más citas esta semana."}`,
-                },
-                {
-                  title: "📊 Servicio Estrella",
-                  body: topServices.length > 0
-                    ? `"${svcLabels[topServices[0][0]] || topServices[0][0]}" es tu servicio más solicitado (${Math.round((topServices[0][1] / totalEvents) * 100)}% de tus citas). Asegúrate de tener suficiente disponibilidad para este tipo de sesión.`
-                    : "Registra citas para descubrir cuáles son tus servicios más populares.",
-                },
-                {
-                  title: "👥 Base de Clientes",
-                  body: `Tienes ${clients.length} clientes registrados en tu catálogo. ${clients.length < 5 ? "Comparte tu link de reservas públicas para atraer nuevos clientes." : "¡Excelente cartera! El boca a boca con tus clientes actuales es una de las mejores formas de crecer."}`,
-                },
-                {
-                  title: "📈 Recomendación Estratégica",
-                  body: "Mantener una tasa de asistencia alta es clave. Considera activar los recordatorios automáticos de citas en la sección de notificaciones para reducir las ausencias al mínimo.",
-                },
-              ].map(({ title, body }, i) => (
-                <div key={i} className="p-4 rounded-2xl border border-border bg-muted/30">
-                  <h4 className="text-sm font-bold text-foreground mb-1.5">{title}</h4>
-                  <p className="text-[13px] text-muted-foreground leading-relaxed">{body}</p>
+              {isAiLoading ? (
+                 <div className="flex flex-col items-center justify-center py-12 gap-4">
+                   <div className="flex gap-2">
+                     <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: PRIMARY }}></span>
+                     <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: PRIMARY, animationDelay: "0.2s" }}></span>
+                     <span className="w-2 h-2 rounded-full animate-bounce" style={{ background: PRIMARY, animationDelay: "0.4s" }}></span>
+                   </div>
+                   <p className="text-sm text-muted-foreground font-semibold">Generando análisis personalizado...</p>
+                 </div>
+              ) : (
+                <div className="prose prose-sm dark:prose-invert max-w-none text-[14px]">
+                  <ReactMarkdown>{aiReport || "Sin resultados."}</ReactMarkdown>
                 </div>
-              ))}
+              )}
             </div>
 
             <div className="px-6 py-4 border-t border-border bg-muted/20 flex items-center justify-between">

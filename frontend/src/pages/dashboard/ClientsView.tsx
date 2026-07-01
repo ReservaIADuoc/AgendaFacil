@@ -26,7 +26,7 @@ export default function ClientsView() {
   const { notes, saving, fetchNotes, saveNote } = useClientNotes(selectedUuid);
 
   // Attachments hook – loads files for the selected client
-  const { attachments, uploading, fetchAttachments, uploadFile, formatSize } = useClientAttachments(selectedUuid);
+  const { attachments, uploading, fetchAttachments, uploadFile, downloadFile, formatSize } = useClientAttachments(selectedUuid);
 
   // Note editor state
   const [noteContent, setNoteContent] = useState("");
@@ -450,7 +450,15 @@ export default function ClientsView() {
                               </div>
                             </div>
                           </div>
-                          <span className="text-[10px] font-bold text-muted-foreground">{formatSize(file.fileSizeBytes)}</span>
+                          <div className="flex items-center gap-3">
+                            <span className="text-[10px] font-bold text-muted-foreground">{formatSize(file.fileSizeBytes)}</span>
+                            <button 
+                              onClick={() => downloadFile(file.id)}
+                              className="text-xs font-bold text-primary hover:underline"
+                            >
+                              Descargar
+                            </button>
+                          </div>
                         </div>
                       ))}
                     </div>

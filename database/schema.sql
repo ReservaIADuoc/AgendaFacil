@@ -113,7 +113,7 @@ CREATE TABLE professionals (
   username_slug         VARCHAR(100)  NOT NULL UNIQUE,
   -- Datos del perfil público
   bio                   TEXT,
-  avatar_key            VARCHAR(500), -- Clave en S3/R2 del avatar
+  avatar_key            TEXT, -- Clave en S3/R2 del avatar
   specialty             VARCHAR(200),
   -- Plan de suscripción
   plan_type             plan_type     NOT NULL DEFAULT 'FREE',

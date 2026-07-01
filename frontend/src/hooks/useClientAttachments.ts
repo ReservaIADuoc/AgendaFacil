@@ -84,5 +84,26 @@ export function useClientAttachments(clientUuid: string | undefined) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
-  return { attachments, loading, uploading, fetchAttachments, uploadFile, formatSize };
+  const downloadFile = async (attachmentId: string) => {
+    if (!clientUuid || !token) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/clients/${clientUuid}/attachments/${attachmentId}/download`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (res.ok) {
+        const data = await res.json();
+        // data contains: filename, mimeType, contentBase64
+        const link = document.createElement("a");
+        link.href = `data:${data.mimeType};base64,${data.contentBase64}`;
+        link.download = data.filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    } catch (e) {
+      console.error("Error downloading file:", e);
+    }
+  };
+
+  return { attachments, loading, uploading, fetchAttachments, uploadFile, downloadFile, formatSize };
 }

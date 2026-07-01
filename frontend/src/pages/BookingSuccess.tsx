@@ -21,37 +21,37 @@ export default function BookingSuccess() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FCFBF8] py-12 px-4 flex items-center justify-center" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <div className="max-w-lg w-full bg-white rounded-[2rem] p-8 md:p-12 shadow-sm border border-black/5 text-center animate-in zoom-in-95 duration-500">
+    <div className="min-h-screen bg-background text-foreground py-12 px-4 flex items-center justify-center" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <div className="max-w-lg w-full bg-card rounded-[2rem] p-8 md:p-12 shadow-sm border border-border text-center animate-in zoom-in-95 duration-500">
         
         <div className="mx-auto w-20 h-20 bg-[#A9B3A2]/20 rounded-full flex items-center justify-center mb-6">
           <CheckCircle className="w-10 h-10 text-[#A9B3A2]" />
         </div>
 
-        <h1 className="text-3xl font-bold text-[#2C2A29] mb-4" style={{ fontFamily: "'Fraunces', serif" }}>
+        <h1 className="text-3xl font-bold text-foreground mb-4" style={{ fontFamily: "'Fraunces', serif" }}>
           ¡Cita Confirmada!
         </h1>
-        <p className="text-[#7E7870] mb-8 text-sm md:text-base leading-relaxed">
-          Tu reserva con <span className="font-semibold text-[#2C2A29]">{state.professionalName}</span> ha sido agendada exitosamente. Te hemos enviado un correo con todos los detalles.
+        <p className="text-muted-foreground mb-8 text-sm md:text-base leading-relaxed">
+          Tu reserva con <span className="font-semibold text-foreground">{state.professionalName}</span> ha sido agendada exitosamente. Te hemos enviado un correo con todos los detalles.
         </p>
 
-        <div className="bg-[#F3EFE9]/50 rounded-2xl p-6 text-left mb-8 border border-[#D1CEC4]">
-          <h3 className="font-bold text-[#2C2A29] mb-4 uppercase tracking-wider text-xs">Detalles de tu cita</h3>
+        <div className="bg-muted/30 rounded-2xl p-6 text-left mb-8 border border-border">
+          <h3 className="font-bold text-foreground mb-4 uppercase tracking-wider text-xs">Detalles de tu cita</h3>
           
           <div className="space-y-4">
             <div>
-              <p className="text-xs text-[#7E7870] uppercase font-semibold tracking-wider mb-1">Servicio</p>
-              <p className="text-sm font-medium text-[#4A4641]">{state.serviceName || "Consulta"}</p>
+              <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider mb-1">Servicio</p>
+              <p className="text-sm font-medium text-foreground">{state.serviceName || "Consulta"}</p>
             </div>
             
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <p className="text-xs text-[#7E7870] uppercase font-semibold tracking-wider mb-1 flex items-center gap-1"><Calendar className="w-3 h-3" /> Fecha</p>
-                <p className="text-sm font-medium text-[#4A4641] capitalize">{state.date}</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider mb-1 flex items-center gap-1"><Calendar className="w-3 h-3" /> Fecha</p>
+                <p className="text-sm font-medium text-foreground capitalize">{state.date}</p>
               </div>
               <div>
-                <p className="text-xs text-[#7E7870] uppercase font-semibold tracking-wider mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> Hora</p>
-                <p className="text-sm font-medium text-[#4A4641]">{state.time}</p>
+                <p className="text-xs text-muted-foreground uppercase font-semibold tracking-wider mb-1 flex items-center gap-1"><Clock className="w-3 h-3" /> Hora</p>
+                <p className="text-sm font-medium text-foreground">{state.time}</p>
               </div>
             </div>
           </div>
@@ -62,7 +62,7 @@ export default function BookingSuccess() {
             Añadir a Google Calendar
           </button>
           
-          <Link to="/" className="w-full py-4 rounded-xl flex items-center justify-center gap-2 text-[#4A4641] font-bold text-base hover:bg-gray-50 border border-transparent hover:border-gray-200 transition-all">
+          <Link to="/" className="w-full py-4 rounded-xl flex items-center justify-center gap-2 text-foreground font-bold text-base hover:bg-muted border border-transparent hover:border-border transition-all">
             Volver al Inicio <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
