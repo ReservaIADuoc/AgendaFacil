@@ -5,6 +5,8 @@ import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import "react-day-picker/dist/style.css";
+import { API_BASE_URL, useAuth } from "../contexts/AuthContext";
+import { useToast } from "../contexts/ToastContext";
 
 const PRIMARY = "#C0987A";
 
@@ -21,6 +23,13 @@ const DAYS_OF_WEEK_SPANISH = [
 export default function Onboarding() {
   const [step, setStep] = useState(1);
   const navigate = useNavigate();
+  const { token } = useAuth();
+  const { showToast } = useToast();
+
+  const [serviceName, setServiceName] = useState("Terapia Individual");
+  const [serviceDuration, setServiceDuration] = useState("01:00");
+  const [servicePrice, setServicePrice] = useState("50000");
+  const [serviceModality, setServiceModality] = useState("video");
   
   // Paso 2: Horario Semanal
   const [weeklyHours, setWeeklyHours] = useState<Record<string, { active: boolean; from: string; to: string }>>({
@@ -40,9 +49,55 @@ export default function Onboarding() {
   const [customFrom, setCustomFrom] = useState("09:00");
   const [customTo, setCustomTo] = useState("18:00");
 
-  const handleNext = () => {
-    if (step < 3) setStep(step + 1);
-    else navigate("/dashboard");
+  const createInitialService = async () => {
+    if (!token) {
+      showToast("No se pudo guardar tu primer servicio automáticamente. Puedes crearlo luego.", "error");
+      return;
+    }
+
+    const [hours, minutes] = serviceDuration.split(":").map(Number);
+    const durationMinutes = (hours || 0) * 60 + (minutes || 0);
+    const normalizedPrice = String(servicePrice)
+      .replace(/\./g, "")
+      .replace(/,/g, "")
+      .replace(/[^\d]/g, "");
+    const cleanPrice = Number(normalizedPrice || 0);
+
+    try {
+      const response = await fetch(`${API_BASE_URL}/services`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: serviceName.trim() || "Terapia Individual",
+          durationMinutes,
+          price: cleanPrice,
+          description: "Servicio creado durante el onboarding",
+          modality: serviceModality.toUpperCase(),
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("No se pudo crear el servicio");
+      }
+
+      showToast("Tu primer servicio se creó correctamente", "success");
+    } catch (error) {
+      console.error("Error creating onboarding service", error);
+      showToast("No se pudo guardar tu primer servicio automáticamente. Puedes crearlo luego.", "error");
+    }
+  };
+
+  const handleNext = async () => {
+    if (step < 3) {
+      setStep(step + 1);
+      return;
+    }
+
+    await createInitialService();
+    navigate("/dashboard");
   };
 
   const handleWeeklyToggle = (dayId: string) => {
@@ -303,14 +358,21 @@ export default function Onboarding() {
                 <div className="space-y-5">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">Nombre del servicio</label>
-                    <input type="text" className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none" placeholder="Ej. Consulta Inicial" defaultValue="Terapia Individual" />
+                    <input
+                      type="text"
+                      value={serviceName}
+                      onChange={(e) => setServiceName(e.target.value)}
+                      className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none"
+                      placeholder="Ej. Consulta Inicial"
+                    />
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-foreground mb-1">Duración</label>
                       <div className="relative">
-                        <select 
-                          defaultValue="00:50" 
+                        <select
+                          value={serviceDuration}
+                          onChange={(e) => setServiceDuration(e.target.value)}
                           className="w-full appearance-none bg-muted text-foreground font-bold px-5 py-3 rounded-xl outline-none focus:ring-2 focus:ring-[#C0987A] border border-border hover:border-muted-foreground/30 transition-all pr-10 cursor-pointer text-sm"
                         >
                           <option value="00:15">00:15 (15 min)</option>
@@ -336,7 +398,38 @@ export default function Onboarding() {
                     </div>
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-foreground mb-1">Precio</label>
-                      <input type="text" className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none" placeholder="Ej. $50.000" />
+                      <input
+                        type="text"
+                        value={servicePrice}
+                        onChange={(e) => setServicePrice(e.target.value)}
+                        className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none"
+                        placeholder="Ej. $50.000"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-foreground mb-1">Modalidad</label>
+                    <div className="flex gap-3">
+                      <label className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-medium cursor-pointer">
+                        <input
+                          type="radio"
+                          name="onboarding-modality"
+                          value="video"
+                          checked={serviceModality === "video"}
+                          onChange={() => setServiceModality("video")}
+                        />
+                        Videollamada
+                      </label>
+                      <label className="flex-1 flex items-center justify-center gap-2 rounded-xl border border-border px-3 py-2.5 text-sm font-medium cursor-pointer">
+                        <input
+                          type="radio"
+                          name="onboarding-modality"
+                          value="presencial"
+                          checked={serviceModality === "presencial"}
+                          onChange={() => setServiceModality("presencial")}
+                        />
+                        Presencial
+                      </label>
                     </div>
                   </div>
                 </div>

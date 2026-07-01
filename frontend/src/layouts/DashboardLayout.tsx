@@ -66,13 +66,21 @@ export default function DashboardLayout() {
   const initials = getInitials(user?.name);
 
   // Notifications State
-  const [unreadCount, setUnreadCount] = useState(2);
+  const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
     const handleRead = () => setUnreadCount(0);
+    const handleCount = (event: Event) => {
+      const customEvent = event as CustomEvent<number>;
+      setUnreadCount(customEvent.detail || 0);
+    };
+
     window.addEventListener("notifications-read", handleRead);
+    window.addEventListener("notifications-count", handleCount as EventListener);
+
     return () => {
       window.removeEventListener("notifications-read", handleRead);
+      window.removeEventListener("notifications-count", handleCount as EventListener);
     };
   }, []);
 

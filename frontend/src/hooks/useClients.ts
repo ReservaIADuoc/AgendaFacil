@@ -18,6 +18,32 @@ export function useClients() {
   const [loading, setLoading] = useState(false);
   const { token } = useAuth();
 
+  const notifyClientsChange = (nextClients: Client[]) => {
+    setClients(nextClients);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new CustomEvent("clients-updated", { detail: nextClients }));
+    }
+  };
+
+  useEffect(() => {
+    const handleClientsUpdated = (event: Event) => {
+      const customEvent = event as CustomEvent<Client[]>;
+      if (Array.isArray(customEvent.detail)) {
+        setClients(customEvent.detail);
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("clients-updated", handleClientsUpdated as EventListener);
+    }
+
+    return () => {
+      if (typeof window !== "undefined") {
+        window.removeEventListener("clients-updated", handleClientsUpdated as EventListener);
+      }
+    };
+  }, []);
+
   const fetchClients = async () => {
     if (!token) return;
     setLoading(true);
@@ -40,16 +66,16 @@ export function useClients() {
             status: item.status || "Activo",
             appointments: item.appointments || 0,
           }));
-          setClients(mapped);
+          notifyClientsChange(mapped);
         } else {
-          setClients([]);
+          notifyClientsChange([]);
         }
       } else {
-        setClients([]);
+        notifyClientsChange([]);
       }
     } catch (e) {
       console.warn("Failed to fetch clients from API:", e);
-      setClients([]);
+      notifyClientsChange([]);
     } finally {
       setLoading(false);
     }
@@ -84,7 +110,7 @@ export function useClients() {
       status: "Nuevo",
       appointments: 1,
     };
-    setClients([...clients, clientToAdd]);
+    notifyClientsChange([...clients, clientToAdd]);
   };
 
   const updateClient = async (id: number, updatedData: Partial<Client>) => {
@@ -108,7 +134,7 @@ export function useClients() {
     }
 
     // Local fallback update
-    setClients(prev => prev.map(c => c.id === id ? { ...c, ...updatedData } : c));
+    notifyClientsChange(clients.map(c => c.id === id ? { ...c, ...updatedData } : c));
   };
 
   const deleteClient = async (id: number) => {
@@ -130,7 +156,7 @@ export function useClients() {
     }
 
     // Local fallback delete
-    setClients(prev => prev.filter(c => c.id !== id));
+    notifyClientsChange(clients.filter(c => c.id !== id));
   };
 
   useEffect(() => {

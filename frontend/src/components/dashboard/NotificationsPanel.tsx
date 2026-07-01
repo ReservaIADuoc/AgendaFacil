@@ -1,6 +1,8 @@
 import { X, Calendar, UserX, UserCheck, Bell } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useToast } from "../../contexts/ToastContext";
+import { useAppointments } from "../../hooks/useAppointments";
+import { useClients } from "../../hooks/useClients";
 
 interface NotificationsPanelProps {
   isOpen: boolean;
@@ -11,33 +13,115 @@ const PRIMARY = "#C0987A";
 
 export default function NotificationsPanel({ isOpen, onClose }: NotificationsPanelProps) {
   const { showToast } = useToast();
-  
-  const [notifications, setNotifications] = useState([
-    { id: 1, type: 'new_booking', title: 'Nueva Reserva', message: 'Carlos López ha agendado "Terapia de Pareja"', time: 'Hace 5 min', unread: true, icon: Calendar },
-    { id: 2, type: 'cancellation', title: 'Cita Cancelada', message: 'Ana Silva canceló su cita de mañana', time: 'Hace 2 horas', unread: true, icon: UserX },
-    { id: 3, type: 'reminder', title: 'Recordatorio', message: 'Tienes 4 citas programadas para hoy', time: 'Hace 5 horas', unread: false, icon: Bell },
-    { id: 4, type: 'new_client', title: 'Nuevo Cliente', message: 'María García se ha registrado en tu portal', time: 'Ayer', unread: false, icon: UserCheck },
+  const { events } = useAppointments();
+  const { clients } = useClients();
+
+  const [notifications, setNotifications] = useState<Array<{ id: number; type: string; title: string; message: string; time: string; unread: boolean; icon: typeof Calendar }>>([
+    {
+      id: 0,
+      type: "info",
+      title: "Cargando notificaciones",
+      message: "Estamos preparando tus avisos recientes...",
+      time: "Ahora",
+      unread: true,
+      icon: Bell,
+    },
   ]);
 
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const now = new Date();
+    const today = now.toISOString().slice(0, 10);
+    const upcoming = [...events]
+      .filter((event) => {
+        const eventDateTime = new Date(`${event.date}T${event.time}:00`);
+        return !Number.isNaN(eventDateTime.getTime()) && eventDateTime >= now && event.status !== "CANCELLED";
+      })
+      .sort((a, b) => new Date(`${a.date}T${a.time}:00`).getTime() - new Date(`${b.date}T${b.time}:00`).getTime());
+
+    const todayAppointments = events.filter((event) => event.date === today);
+    const nextAppointment = upcoming[0];
+
+    const builtNotifications: Array<{ id: number; type: string; title: string; message: string; time: string; unread: boolean; icon: typeof Calendar }> = [];
+
+    if (nextAppointment) {
+      builtNotifications.push({
+        id: 1,
+        type: "new_booking",
+        title: "Próxima cita",
+        message: `${nextAppointment.clientName} tiene cita el ${nextAppointment.date} a las ${nextAppointment.time}`,
+        time: "Próxima",
+        unread: true,
+        icon: Calendar,
+      });
+    }
+
+    if (todayAppointments.length > 0) {
+      builtNotifications.push({
+        id: 2,
+        type: "reminder",
+        title: "Recordatorio",
+        message: `Tienes ${todayAppointments.length} citas programadas para hoy`,
+        time: "Hoy",
+        unread: true,
+        icon: Bell,
+      });
+    }
+
+    if (clients.length > 0) {
+      builtNotifications.push({
+        id: 3,
+        type: "new_client",
+        title: "Clientes registrados",
+        message: `Tienes ${clients.length} clientes en tu cartera`,
+        time: "Actualizado",
+        unread: true,
+        icon: UserCheck,
+      });
+    }
+
+    if (builtNotifications.length === 0) {
+      builtNotifications.push({
+        id: 1,
+        type: "info",
+        title: "Sin actividad reciente",
+        message: "Aún no hay citas ni clientes nuevos para mostrar.",
+        time: "Ahora",
+        unread: false,
+        icon: Bell,
+      });
+    }
+
+    setNotifications(builtNotifications);
+  }, [isOpen, events, clients]);
 
   const handleMarkAllRead = () => {
     setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-    // Emit global event to clear red dot in Navbar
     window.dispatchEvent(new CustomEvent("notifications-read"));
+    window.dispatchEvent(new CustomEvent("notifications-count", { detail: 0 }));
     showToast("Notificaciones marcadas como leídas", "success");
   };
 
   const handleNotificationClick = (id: number) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, unread: false } : n));
-    // If no more unread notifications, clear navbar dot too
-    const remainingUnread = notifications.filter(n => n.id !== id && n.unread).length;
-    if (remainingUnread === 0) {
-      window.dispatchEvent(new CustomEvent("notifications-read"));
-    }
+    setNotifications(prev => {
+      const updated = prev.map(n => n.id === id ? { ...n, unread: false } : n);
+      const remainingUnread = updated.filter(n => n.unread).length;
+      if (remainingUnread === 0) {
+        window.dispatchEvent(new CustomEvent("notifications-read"));
+      }
+      window.dispatchEvent(new CustomEvent("notifications-count", { detail: remainingUnread }));
+      return updated;
+    });
   };
 
   const unreadCount = notifications.filter(n => n.unread).length;
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent("notifications-count", { detail: unreadCount }));
+  }, [unreadCount]);
+
+  if (!isOpen) return null;
 
   return (
     <>
