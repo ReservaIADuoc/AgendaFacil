@@ -85,6 +85,9 @@ public class AiChatController {
                     "Los días permitidos son: MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY. Si indica que no atiende un día, pon \"isActive\": false, \"startTime\": \"09:00\", \"endTime\": \"18:00\".\n\n" +
                     "2. Agendar citas: Si te pide agendar una cita con un cliente (ej: 'agenda una Consulta General con Carlos López para el jueves a las 10:00'), responde amigablemente y pon al final de tu respuesta:\n" +
                     "[SCHEDULE_ACTION] {\"clientName\": \"Nombre del Cliente\", \"serviceName\": \"Nombre del Servicio\", \"dateTime\": \"YYYY-MM-DDTHH:mm:00Z\"}\n\n" +
+                    "3. Cancelar citas: Si te pide cancelar una cita existente (ej: 'cancela la cita del jueves a las 10:00' o 'cancela la cita de Carlos López de mañana'), confirma amigablemente y pon al final de tu respuesta:\n" +
+                    "[CANCEL_ACTION] {\"clientName\": \"Nombre del Cliente\", \"dateTime\": \"YYYY-MM-DDTHH:mm:00Z\"}\n" +
+                    "Si no se menciona el nombre del cliente en la cancelación, pon \"clientName\": null.\n\n" +
                     "Los servicios disponibles son:\n" + servicesStr.toString() + "\n" +
                     "Hoy es lunes 30 de junio de 2026. Responde brevemente y en español.";
 
@@ -105,6 +108,13 @@ public class AiChatController {
             if (setScheduleIndex != -1) {
                 setScheduleJson = geminiResponse.substring(setScheduleIndex + "[SET_SCHEDULE_ACTION]".length()).trim();
                 cleanResponse = geminiResponse.substring(0, setScheduleIndex).trim();
+            }
+
+            String cancelJson = null;
+            int cancelIndex = geminiResponse.indexOf("[CANCEL_ACTION]");
+            if (cancelIndex != -1) {
+                cancelJson = geminiResponse.substring(cancelIndex + "[CANCEL_ACTION]".length()).trim();
+                cleanResponse = geminiResponse.substring(0, cancelIndex).trim();
             }
 
             String intent = "GENERAL_SUPPORT";
@@ -186,6 +196,37 @@ public class AiChatController {
                 }
             }
 
+            if (cancelJson != null) {
+                try {
+                    Map<String, Object> cancelData = objectMapper.readValue(cancelJson, Map.class);
+                    String clientName = (String) cancelData.get("clientName");
+                    String dateTimeStr = (String) cancelData.get("dateTime");
+
+                    if (dateTimeStr != null) {
+                        OffsetDateTime targetTime = OffsetDateTime.parse(dateTimeStr);
+                        OffsetDateTime start = targetTime.minusMinutes(5);
+                        OffsetDateTime end = targetTime.plusMinutes(5);
+
+                        Optional<String> apptIdOpt;
+                        if (clientName != null && !clientName.trim().isEmpty()) {
+                            apptIdOpt = repository.findAppointmentByClientAndDateRange(professionalId, clientName, start, end);
+                        } else {
+                            apptIdOpt = repository.findAppointmentByDateRange(professionalId, start, end);
+                        }
+
+                        if (apptIdOpt.isPresent()) {
+                            UUID apptId = UUID.fromString(apptIdOpt.get());
+                            repository.updateAppointmentStatus(apptId, "CANCELLED_BY_PROFESSIONAL");
+                            actionTaken = "CANCEL_APPOINTMENT";
+                            actionEntityId = apptId;
+                            intent = "CANCEL_APPOINTMENT";
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Error cancelling appointment from AI response: " + ex.getMessage());
+                }
+            }
+
             // Save AI interaction
             repository.saveAiInteraction(professionalId, sessionId, intent, userMessage, cleanResponse, actionTaken, actionEntityId);
 
@@ -252,9 +293,12 @@ public class AiChatController {
             String systemInstructionText = "Eres el Asistente Virtual de Reservas de " + profName + " en Agenda Fácil. Tu función es ayudar a los clientes/pacientes que visitan su página pública de reservas. Debes ser muy servicial, educado y responder en español.\n\n" +
                     "Los servicios ofrecidos son:\n" + servicesStr.toString() + "\n" +
                     "La disponibilidad para los próximos 3 días es (hoy es lunes 30 de junio de 2026):\n" + availabilityStr.toString() + "\n" +
-                    "Ayuda al cliente a seleccionar un servicio, día y hora de los que están disponibles.\n" +
-                    "Para agendar una hora, necesitas pedirle obligatoriamente al cliente su Nombre Completo y Correo Electrónico. Una vez que tengas el servicio, el día, la hora (dentro de los rangos disponibles), su nombre y su correo, confirma la reserva amigablemente y, OBLIGATORIAMENTE al final de tu respuesta, debes incluir una sola línea con el siguiente formato JSON exacto:\n" +
+                    "Ayuda al cliente a seleccionar un servicio, día y hora de los que están disponibles.\n\n" +
+                    "Tus funciones clave son:\n" +
+                    "1. Agendar una hora: necesitas pedirle obligatoriamente al cliente su Nombre Completo y Correo Electrónico. Una vez que tengas el servicio, el día, la hora (dentro de los rangos disponibles), su nombre y su correo, confirma la reserva amigablemente y, OBLIGATORIAMENTE al final de tu respuesta, debes incluir una sola línea con el siguiente formato JSON exacto:\n" +
                     "[SCHEDULE_ACTION] {\"clientName\": \"Nombre Completo Cliente\", \"clientEmail\": \"correo@cliente.com\", \"serviceName\": \"Nombre exacto del Servicio\", \"dateTime\": \"YYYY-MM-DDTHH:mm:00Z\"}\n\n" +
+                    "2. Cancelar una hora: Si el cliente te pide cancelar su cita (ej: 'cancela mi cita de mañana a las 10:00' o 'quiero cancelar mi hora'), pídele confirmación, nombre completo del cliente y correo. Una vez obtenido, confirma la cancelación y pon al final:\n" +
+                    "[CANCEL_ACTION] {\"clientName\": \"Nombre Completo Cliente\", \"dateTime\": \"YYYY-MM-DDTHH:mm:00Z\"}\n\n" +
                     "Asegúrate de deducir el formato ISO de fecha y hora basándote en el día seleccionado. Si te preguntan otra cosa, responde de manera amigable y breve, usando emojis y saltos de línea sencillos.";
 
             // Call Gemini
@@ -267,6 +311,13 @@ public class AiChatController {
             if (scheduleIndex != -1) {
                 scheduleJson = geminiResponse.substring(scheduleIndex + "[SCHEDULE_ACTION]".length()).trim();
                 cleanResponse = geminiResponse.substring(0, scheduleIndex).trim();
+            }
+
+            String cancelJson = null;
+            int cancelIndex = geminiResponse.indexOf("[CANCEL_ACTION]");
+            if (cancelIndex != -1) {
+                cancelJson = geminiResponse.substring(cancelIndex + "[CANCEL_ACTION]".length()).trim();
+                cleanResponse = geminiResponse.substring(0, cancelIndex).trim();
             }
 
             String intent = "GENERAL_SUPPORT";
@@ -331,6 +382,37 @@ public class AiChatController {
                     }
                 } catch (Exception ex) {
                     System.err.println("Error scheduling appointment from public AI response: " + ex.getMessage());
+                }
+            }
+
+            if (cancelJson != null) {
+                try {
+                    Map<String, Object> cancelData = objectMapper.readValue(cancelJson, Map.class);
+                    String clientName = (String) cancelData.get("clientName");
+                    String dateTimeStr = (String) cancelData.get("dateTime");
+
+                    if (dateTimeStr != null) {
+                        OffsetDateTime targetTime = OffsetDateTime.parse(dateTimeStr);
+                        OffsetDateTime start = targetTime.minusMinutes(5);
+                        OffsetDateTime end = targetTime.plusMinutes(5);
+
+                        Optional<String> apptIdOpt;
+                        if (clientName != null && !clientName.trim().isEmpty()) {
+                            apptIdOpt = repository.findAppointmentByClientAndDateRange(professionalId, clientName, start, end);
+                        } else {
+                            apptIdOpt = repository.findAppointmentByDateRange(professionalId, start, end);
+                        }
+
+                        if (apptIdOpt.isPresent()) {
+                            UUID apptId = UUID.fromString(apptIdOpt.get());
+                            repository.updateAppointmentStatus(apptId, "CANCELLED_BY_CLIENT");
+                            actionTaken = "CANCEL_APPOINTMENT";
+                            actionEntityId = apptId;
+                            intent = "CANCEL_APPOINTMENT";
+                        }
+                    }
+                } catch (Exception ex) {
+                    System.err.println("Error cancelling appointment from public AI response: " + ex.getMessage());
                 }
             }
 

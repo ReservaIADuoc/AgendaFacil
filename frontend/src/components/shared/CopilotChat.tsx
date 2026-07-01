@@ -90,6 +90,7 @@ export default function CopilotChat({ mode = "professional", username }: { mode?
       setIsTyping(false);
 
       const isAction = data.actionTaken === "SCHEDULE_APPOINTMENT";
+      const isCancel = data.actionTaken === "CANCEL_APPOINTMENT";
 
       setMessages(prev => [
         ...prev,
@@ -101,8 +102,8 @@ export default function CopilotChat({ mode = "professional", username }: { mode?
         }
       ]);
 
-      // If an appointment was scheduled, trigger update of the calendar/dashboard
-      if (isAction) {
+      // If an appointment was scheduled or cancelled, trigger update of the calendar/dashboard
+      if (isAction || isCancel) {
         window.dispatchEvent(new CustomEvent("appointment-created"));
       }
 
