@@ -59,7 +59,7 @@ describe("AuthContext", () => {
         ok: true,
         json: async () => ({ token: "login-token" }),
       })
-      .mockResolvedValueOnce({
+      .mockResolvedValue({
         ok: true,
         json: async () => ({ id: 1, email: "test@mail.com", name: "Valentina" }),
       });
@@ -113,7 +113,7 @@ describe("AuthContext", () => {
         ok: true,
         json: async () => ({ token: "registered-token" }),
       })
-      .mockResolvedValueOnce({
+      .mockResolvedValue({
         ok: true,
         json: async () => ({ id: 1, email: "test@mail.com", name: "Name" }),
       });
