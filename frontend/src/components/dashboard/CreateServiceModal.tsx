@@ -86,11 +86,12 @@ export default function CreateServiceModal({ isOpen, onClose, onSave, serviceToE
             <div className="grid grid-cols-2 gap-4">
               {/* Duración */}
               <div>
-                <label className="block text-[13px] font-bold text-foreground mb-1.5 flex items-center gap-2">
+                <label htmlFor="duration-select" className="block text-[13px] font-bold text-foreground mb-1.5 flex items-center gap-2">
                   <Clock className="w-4 h-4 text-muted-foreground" /> Duración
                 </label>
                 <div className="relative">
                   <select
+                    id="duration-select"
                     value={duration}
                     onChange={(e) => setDuration(e.target.value)}
                     className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#C0987A] text-[14px] bg-muted/30 text-foreground appearance-none cursor-pointer"

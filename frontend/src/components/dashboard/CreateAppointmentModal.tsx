@@ -96,11 +96,12 @@ export default function CreateAppointmentModal({
 
         <div className="p-6 space-y-5">
           <div>
-            <label className="block text-[13px] font-bold text-foreground mb-1.5 flex items-center gap-2">
+            <label htmlFor="client-select" className="block text-[13px] font-bold text-foreground mb-1.5 flex items-center gap-2">
               <User className="w-4 h-4 text-[#A9B3A2]" /> Cliente
             </label>
             {clients.length > 0 ? (
               <select
+                id="client-select"
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#C0987A]/30 text-[14px] bg-background text-foreground appearance-none cursor-pointer"
@@ -120,11 +121,12 @@ export default function CreateAppointmentModal({
           </div>
 
           <div>
-            <label className="block text-[13px] font-bold text-foreground mb-1.5 flex items-center gap-2">
+            <label htmlFor="service-select" className="block text-[13px] font-bold text-foreground mb-1.5 flex items-center gap-2">
               <AlignLeft className="w-4 h-4 text-[#A9B3A2]" /> Servicio
             </label>
             {services.length > 0 ? (
               <select
+                id="service-select"
                 value={serviceId}
                 onChange={(e) => setServiceId(e.target.value)}
                 className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#C0987A]/30 text-[14px] bg-background text-foreground appearance-none cursor-pointer"

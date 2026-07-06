@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, act, fireEvent } from "@testing-library/react";
 import { ToastProvider, useToast } from "../ToastContext";
 import { vi, describe, it, expect } from "vitest";
 
@@ -26,7 +26,7 @@ describe("ToastContext", () => {
       </ToastProvider>
     );
 
-    screen.getByTestId("btn-toast").click();
+    fireEvent.click(screen.getByTestId("btn-toast"));
     expect(screen.getByText("Success message")).toBeInTheDocument();
   });
 
@@ -38,7 +38,7 @@ describe("ToastContext", () => {
       </ToastProvider>
     );
 
-    screen.getByTestId("btn-toast").click();
+    fireEvent.click(screen.getByTestId("btn-toast"));
     expect(screen.getByText("Success message")).toBeInTheDocument();
 
     act(() => {
