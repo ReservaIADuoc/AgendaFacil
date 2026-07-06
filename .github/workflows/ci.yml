@@ -26,7 +26,7 @@ jobs:
         cache: maven
         
     - name: Build and Test with Maven
-      run: chmod +x mvnw && ./mvnw test
+      run: chmod +x mvnw && ./mvnw test -B
 
   frontend-tests:
     name: Frontend Unit Tests (React/Vitest)
@@ -50,6 +50,6 @@ jobs:
       run: npm ci
       
     - name: Run Vitest Tests
-      run: npm run test
+      run: npx vitest run --pool=forks
       env:
         CI: true
