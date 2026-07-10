@@ -22,74 +22,6 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
   const { showToast } = useToast();
   const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
-  useEffect(() => {
-    if (!isOpen) return;
-
-    const now = new Date();
-    const today = now.toISOString().slice(0, 10);
-    const upcoming = [...events]
-      .filter((event) => {
-        const eventDateTime = new Date(`${event.date}T${event.time}:00`);
-        return !Number.isNaN(eventDateTime.getTime()) && eventDateTime >= now && event.status !== "CANCELLED";
-      })
-      .sort((a, b) => new Date(`${a.date}T${a.time}:00`).getTime() - new Date(`${b.date}T${b.time}:00`).getTime());
-
-    const todayAppointments = events.filter((event) => event.date === today);
-    const nextAppointment = upcoming[0];
-
-    const builtNotifications: Array<{ id: number; type: string; title: string; message: string; time: string; unread: boolean; icon: typeof Calendar }> = [];
-
-    if (nextAppointment) {
-      builtNotifications.push({
-        id: 1,
-        type: "new_booking",
-        title: "Próxima cita",
-        message: `${nextAppointment.clientName} tiene cita el ${nextAppointment.date} a las ${nextAppointment.time}`,
-        time: "Próxima",
-        unread: true,
-        icon: Calendar,
-      });
-    }
-
-    if (todayAppointments.length > 0) {
-      builtNotifications.push({
-        id: 2,
-        type: "reminder",
-        title: "Recordatorio",
-        message: `Tienes ${todayAppointments.length} citas programadas para hoy`,
-        time: "Hoy",
-        unread: true,
-        icon: Bell,
-      });
-    }
-
-    if (clients.length > 0) {
-      builtNotifications.push({
-        id: 3,
-        type: "new_client",
-        title: "Clientes registrados",
-        message: `Tienes ${clients.length} clientes en tu cartera`,
-        time: "Actualizado",
-        unread: true,
-        icon: UserCheck,
-      });
-    }
-
-    if (builtNotifications.length === 0) {
-      builtNotifications.push({
-        id: 1,
-        type: "info",
-        title: "Sin actividad reciente",
-        message: "Aún no hay citas ni clientes nuevos para mostrar.",
-        time: "Ahora",
-        unread: false,
-        icon: Bell,
-      });
-    }
-
-    setNotifications(builtNotifications);
-  }, [isOpen, events, clients]);
-
   const handleMarkAllRead = () => {
     markAllAsRead();
     showToast("Notificaciones marcadas como leídas", "success");
@@ -98,6 +30,8 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
   const handleNotificationClick = (id: number) => {
     markAsRead(id);
   };
+
+  if (!isOpen) return null;
 
   return (
     <>
