@@ -1,32 +1,26 @@
 import { X, Calendar, UserX, UserCheck, Bell } from "lucide-react";
-import { useEffect, useState } from "react";
 import { useToast } from "../../contexts/ToastContext";
-import { useAppointments } from "../../hooks/useAppointments";
-import { useClients } from "../../hooks/useClients";
+import { useNotifications, NotificationType } from "../../contexts/NotificationsContext";
+import { formatDistanceToNow } from "date-fns";
+import { es } from "date-fns/locale";
 
 interface NotificationsPanelProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-const PRIMARY = "#C0987A";
+const getIcon = (type: NotificationType) => {
+  switch (type) {
+    case 'new_booking': return Calendar;
+    case 'cancellation': return UserX;
+    case 'new_client': return UserCheck;
+    default: return Bell;
+  }
+};
 
 export default function NotificationsPanel({ isOpen, onClose }: NotificationsPanelProps) {
   const { showToast } = useToast();
-  const { events } = useAppointments();
-  const { clients } = useClients();
-
-  const [notifications, setNotifications] = useState<Array<{ id: number; type: string; title: string; message: string; time: string; unread: boolean; icon: typeof Calendar }>>([
-    {
-      id: 0,
-      type: "info",
-      title: "Cargando notificaciones",
-      message: "Estamos preparando tus avisos recientes...",
-      time: "Ahora",
-      unread: true,
-      icon: Bell,
-    },
-  ]);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
 
   useEffect(() => {
     if (!isOpen) return;
@@ -97,31 +91,13 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
   }, [isOpen, events, clients]);
 
   const handleMarkAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, unread: false })));
-    window.dispatchEvent(new CustomEvent("notifications-read"));
-    window.dispatchEvent(new CustomEvent("notifications-count", { detail: 0 }));
+    markAllAsRead();
     showToast("Notificaciones marcadas como leídas", "success");
   };
 
   const handleNotificationClick = (id: number) => {
-    setNotifications(prev => {
-      const updated = prev.map(n => n.id === id ? { ...n, unread: false } : n);
-      const remainingUnread = updated.filter(n => n.unread).length;
-      if (remainingUnread === 0) {
-        window.dispatchEvent(new CustomEvent("notifications-read"));
-      }
-      window.dispatchEvent(new CustomEvent("notifications-count", { detail: remainingUnread }));
-      return updated;
-    });
+    markAsRead(id);
   };
-
-  const unreadCount = notifications.filter(n => n.unread).length;
-
-  useEffect(() => {
-    window.dispatchEvent(new CustomEvent("notifications-count", { detail: unreadCount }));
-  }, [unreadCount]);
-
-  if (!isOpen) return null;
 
   return (
     <>
@@ -151,15 +127,15 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
 
         <div className="flex-1 overflow-y-auto p-4 space-y-3 bg-muted/10">
           {notifications.map(notif => {
-            const Icon = notif.icon;
+            const Icon = getIcon(notif.type);
             return (
               <div 
                 key={notif.id}
                 onClick={() => handleNotificationClick(notif.id)}
-                className={`p-4 rounded-2xl border transition-all cursor-pointer ${notif.unread ? 'bg-muted/50 border-[#C0987A]/30' : 'bg-card border-border opacity-70 hover:opacity-100'}`}
+                className={`p-4 rounded-2xl border transition-all cursor-pointer ${notif.unread ? 'bg-muted/50 border-primary/30' : 'bg-card border-border opacity-70 hover:opacity-100'}`}
               >
                 <div className="flex gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'cancellation' ? 'bg-red-500/10 text-red-500' : 'bg-muted text-[#C0987A]'}`}>
+                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${notif.type === 'cancellation' ? 'bg-red-500/10 text-red-500' : 'bg-muted text-primary'}`}>
                     <Icon className="w-5 h-5" />
                   </div>
                   <div className="flex-1">
@@ -179,7 +155,7 @@ export default function NotificationsPanel({ isOpen, onClose }: NotificationsPan
           <button 
             onClick={handleMarkAllRead}
             disabled={unreadCount === 0}
-            className="w-full py-3 text-sm font-bold text-[#C0987A] bg-muted hover:bg-muted/80 rounded-xl transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full py-3 text-sm font-bold text-primary bg-muted hover:bg-muted/80 rounded-xl transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Marcar todas como leídas
           </button>

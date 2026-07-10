@@ -2,7 +2,7 @@ import { X, Search as SearchIcon } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
-const PRIMARY = "#C0987A";
+
 
 export default function SearchModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   const [query, setQuery] = useState("");
@@ -21,9 +21,9 @@ export default function SearchModal({ isOpen, onClose }: { isOpen: boolean, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 backdrop-blur-sm pt-[10vh] px-4 transition-all" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-start justify-center bg-background/40 backdrop-blur-sm pt-[10vh] px-4 transition-all" onClick={onClose}>
       <div 
-        className="bg-card rounded-3xl w-full max-w-2xl shadow-2xl overflow-hidden border border-border animate-in fade-in slide-in-from-top-10 duration-200 text-foreground"
+        className="bg-card/90 backdrop-blur-2xl rounded-[2.5rem] w-full max-w-2xl shadow-2xl shadow-primary/10 overflow-hidden border border-white/20 animate-in fade-in slide-in-from-top-10 duration-300 text-foreground"
         style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
         onClick={(e) => e.stopPropagation()}
       >
@@ -55,7 +55,7 @@ export default function SearchModal({ isOpen, onClose }: { isOpen: boolean, onCl
                   onClick={() => handleClientClick(1)}
                   className="flex items-center gap-3 px-3 py-2 rounded-xl hover:bg-card border border-transparent hover:border-border cursor-pointer transition-colors"
                 >
-                  <div className="w-8 h-8 rounded-full bg-[#EAE5DF] dark:bg-[#C0987A]/20 flex items-center justify-center text-[#C0987A] font-bold text-xs">MG</div>
+                  <div className="w-8 h-8 rounded-full bg-[#EAE5DF] dark:bg-primary/20 flex items-center justify-center text-primary font-bold text-xs">MG</div>
                   <div>
                     <div className="text-sm font-semibold text-foreground">María García</div>
                     <div className="text-xs text-muted-foreground">Cliente</div>

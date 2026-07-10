@@ -3,8 +3,8 @@ import { useState, useEffect } from "react";
 
 import type { AppointmentEvent } from "../../hooks/useAppointments";
 
-const PRIMARY = "#C0987A";
-const SERVICE_COLORS = ["#C0987A", "#D9A05B", "#A9B3A2", "#7E9E87", "#B8936A"];
+
+const SERVICE_COLORS = ["var(--theme-primary, #C0987A)", "#D9A05B", "#A9B3A2", "#7E9E87", "#B8936A"];
 
 export interface ClientOption {
   uuid?: string;
@@ -77,9 +77,9 @@ export default function CreateAppointmentModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/40 backdrop-blur-sm p-4 transition-all">
       <div
-        className="bg-card rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-border animate-in fade-in zoom-in-95 duration-200 text-foreground"
+        className="bg-card/90 backdrop-blur-2xl rounded-[2.5rem] w-full max-w-lg shadow-2xl shadow-primary/10 overflow-hidden border border-white/20 animate-in fade-in zoom-in-95 duration-300 text-foreground"
         style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-muted/30">
@@ -104,7 +104,7 @@ export default function CreateAppointmentModal({
                 id="client-select"
                 value={clientId}
                 onChange={(e) => setClientId(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#C0987A]/30 text-[14px] bg-background text-foreground appearance-none cursor-pointer"
+                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 text-[14px] bg-background text-foreground appearance-none cursor-pointer"
               >
                 <option value="" disabled>Selecciona un cliente</option>
                 {clients.map((c) => (
@@ -129,7 +129,7 @@ export default function CreateAppointmentModal({
                 id="service-select"
                 value={serviceId}
                 onChange={(e) => setServiceId(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#C0987A]/30 text-[14px] bg-background text-foreground appearance-none cursor-pointer"
+                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 text-[14px] bg-background text-foreground appearance-none cursor-pointer"
               >
                 <option value="" disabled>Selecciona un servicio</option>
                 {services.map((s) => (
@@ -154,7 +154,7 @@ export default function CreateAppointmentModal({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#C0987A]/30 text-[14px] bg-background text-foreground"
+                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 text-[14px] bg-background text-foreground"
               />
             </div>
             <div>
@@ -165,7 +165,7 @@ export default function CreateAppointmentModal({
                 type="time"
                 value={time}
                 onChange={(e) => setTime(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#C0987A]/30 text-[14px] bg-background text-foreground"
+                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary/30 text-[14px] bg-background text-foreground"
               />
             </div>
           </div>
@@ -182,7 +182,7 @@ export default function CreateAppointmentModal({
             onClick={handleSave}
             disabled={!clientId || !serviceId || !date || !time}
             className="px-6 py-2.5 rounded-xl text-[14px] font-bold text-white transition-all shadow-md hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 cursor-pointer"
-            style={{ background: PRIMARY }}
+            style={{ background: "var(--theme-primary, #C0987A)" }}
           >
             Guardar Cita
           </button>

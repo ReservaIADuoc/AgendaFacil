@@ -3,6 +3,8 @@ import { ArrowRight, Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
+import { motion } from "framer-motion";
+import BackgroundBlobs from "../components/shared/BackgroundBlobs";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -38,10 +40,17 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col justify-center py-12 sm:px-6 lg:px-8" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <div className="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center">
-        <Link to="/" className="flex items-center gap-2 mb-8">
-          <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "#C0987A" }}>
+    <div className="min-h-screen flex flex-col justify-center py-12 sm:px-6 lg:px-8 bg-background relative overflow-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <BackgroundBlobs />
+      
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="sm:mx-auto sm:w-full sm:max-w-md flex flex-col items-center relative z-10"
+      >
+        <Link to="/" className="flex items-center gap-2 mb-8 group">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-500 group-hover:rotate-[360deg] group-hover:scale-110 shadow-lg shadow-primary/20" style={{ background: "var(--theme-primary, #C0987A)" }}>
             <Calendar className="w-5 h-5 text-white" />
           </div>
           <span className="text-[22px] font-bold tracking-tight text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
@@ -53,14 +62,19 @@ export default function Login() {
         </h2>
         <p className="mt-2 text-center text-sm text-muted-foreground">
           ¿O eres nuevo aquí?{" "}
-          <Link to="/register" className="font-medium text-[#C0987A] hover:text-[#A9B3A2]">
+          <Link to="/register" className="font-medium text-primary hover:text-[#A9B3A2] transition-colors relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-[#A9B3A2] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left">
             Crea tu agenda gratis
           </Link>
         </p>
-      </div>
+      </motion.div>
 
-      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-card py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-border">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
+        className="mt-8 sm:mx-auto sm:w-full sm:max-w-md relative z-10"
+      >
+        <div className="glass-heavy py-10 px-4 sm:rounded-[2.5rem] sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-foreground">
@@ -75,7 +89,7 @@ export default function Login() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full appearance-none rounded-xl border border-border px-3 py-2 placeholder-muted-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-muted text-foreground"
+                  className="block w-full appearance-none rounded-2xl border border-border/60 px-5 py-3.5 placeholder-muted-foreground shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 sm:text-sm bg-muted/30 text-foreground transition-all duration-300 hover:border-border hover:shadow-inner"
                 />
               </div>
             </div>
@@ -93,7 +107,7 @@ export default function Login() {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full appearance-none rounded-xl border border-border px-3 py-2 placeholder-muted-foreground shadow-sm focus:border-primary focus:outline-none focus:ring-primary sm:text-sm bg-muted text-foreground"
+                  className="block w-full appearance-none rounded-2xl border border-border/60 px-5 py-3.5 placeholder-muted-foreground shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/40 sm:text-sm bg-muted/30 text-foreground transition-all duration-300 hover:border-border hover:shadow-inner"
                 />
               </div>
             </div>
@@ -104,7 +118,7 @@ export default function Login() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 rounded border-[#D1CEC4] text-[#C0987A] focus:ring-[#C0987A]"
+                  className="h-4 w-4 rounded border-[#D1CEC4] text-primary focus:ring-primary transition-colors"
                 />
                 <label htmlFor="remember-me" className="ml-2 block text-sm text-muted-foreground">
                   Recordarme
@@ -112,7 +126,7 @@ export default function Login() {
               </div>
 
               <div className="text-sm">
-                <a href="#" className="font-medium text-[#C0987A] hover:text-[#A9B3A2]">
+                <a href="#" className="font-medium text-primary hover:text-[#A9B3A2] transition-colors">
                   ¿Olvidaste tu contraseña?
                 </a>
               </div>
@@ -122,7 +136,7 @@ export default function Login() {
               <button
                 type="submit"
                 disabled={loading}
-                className="flex w-full justify-center items-center gap-2 rounded-xl border border-transparent bg-[#C0987A] py-3 px-4 text-sm font-bold text-white shadow-sm hover:bg-opacity-90 focus:outline-none focus:ring-2 focus:ring-[#C0987A] focus:ring-offset-2 transition-all cursor-pointer disabled:opacity-50"
+                className="flex w-full justify-center items-center gap-2 rounded-2xl border border-transparent bg-gradient-to-r from-primary to-primary/80 py-4 px-4 text-[15px] font-bold text-white shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-500 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none"
               >
                 {loading ? "Ingresando..." : "Ingresar"}
                 <ArrowRight className="w-4 h-4" />
@@ -130,7 +144,8 @@ export default function Login() {
             </div>
           </form>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
+

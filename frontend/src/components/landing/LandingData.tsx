@@ -36,7 +36,7 @@ export const testimonials = [
     text: "Antes perdía 2 horas al día gestionando la agenda por WhatsApp. Ahora mis clientes reservan solos y yo me enfoco en lo que importa: la terapia.",
     rating: 5,
     initials: "VR",
-    hue: "#C0987A",
+    hue: "var(--theme-primary, #C0987A)",
   },
   {
     name: "Matías Fuentes",

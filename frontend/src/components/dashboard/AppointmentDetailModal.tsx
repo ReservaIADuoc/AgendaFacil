@@ -4,7 +4,7 @@ import { es } from "date-fns/locale";
 import { useState, useEffect } from "react";
 import type { AppointmentEvent } from "../../hooks/useAppointments";
 
-const PRIMARY = "#C0987A";
+
 
 interface AppointmentDetailModalProps {
   event: AppointmentEvent | null;
@@ -59,8 +59,8 @@ export default function AppointmentDetailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4">
-      <div className="bg-card rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-border animate-in fade-in zoom-in-95 duration-200 text-foreground">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/40 backdrop-blur-sm p-4">
+      <div className="bg-card/90 backdrop-blur-2xl rounded-[2.5rem] w-full max-w-md shadow-2xl shadow-primary/10 overflow-hidden border border-white/20 animate-in fade-in zoom-in-95 duration-300 text-foreground">
         
         {/* Header */}
         <div
@@ -88,7 +88,7 @@ export default function AppointmentDetailModal({
           <div className="flex items-center gap-3">
             <div
               className="w-10 h-10 rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-              style={{ background: event.serviceColor || "#C0987A" }}
+              style={{ background: event.serviceColor || "var(--theme-primary, #C0987A)" }}
             >
               {event.clientName.split(" ").map((n) => n[0]).join("").substring(0, 2).toUpperCase()}
             </div>
@@ -187,7 +187,7 @@ export default function AppointmentDetailModal({
                 <button
                   onClick={handleSave}
                   className="px-4 py-2 rounded-xl text-xs font-bold text-white transition-all cursor-pointer shadow-sm hover:shadow-md"
-                  style={{ background: PRIMARY }}
+                  style={{ background: "var(--theme-primary, #C0987A)" }}
                 >
                   Guardar
                 </button>

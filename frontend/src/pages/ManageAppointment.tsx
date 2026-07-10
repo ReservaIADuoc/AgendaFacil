@@ -1,7 +1,7 @@
 import { Calendar, Clock, MapPin, Video, User, AlertCircle, X, RefreshCw, ArrowLeft } from "lucide-react";
 import { Link, useParams } from "react-router";
 
-const PRIMARY = "#C0987A";
+
 
 export default function ManageAppointment() {
   const { id } = useParams();
@@ -22,7 +22,7 @@ export default function ManageAppointment() {
     <div className="min-h-screen bg-[#FCFBF8] py-12 px-4 flex items-center justify-center relative" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
       
       {/* Botón Volver */}
-      <Link to="/" className="absolute top-6 left-6 md:top-8 md:left-8 flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-[#C0987A] transition-colors">
+      <Link to="/" className="absolute top-6 left-6 md:top-8 md:left-8 flex items-center gap-2 text-sm font-bold text-gray-500 hover:text-primary transition-colors">
         <ArrowLeft className="w-4 h-4" />
         Volver
       </Link>
@@ -30,7 +30,7 @@ export default function ManageAppointment() {
       <div className="max-w-lg w-full bg-white rounded-[2rem] p-8 shadow-sm border border-black/5 animate-in slide-in-from-bottom-4 duration-500">
         
         <div className="text-center mb-8">
-          <div className="mx-auto w-20 h-20 bg-[#C0987A]/10 rounded-full flex items-center justify-center mb-4 text-[#C0987A]">
+          <div className="mx-auto w-20 h-20 bg-primary/10 rounded-full flex items-center justify-center mb-4 text-primary">
             <Calendar className="w-10 h-10" />
           </div>
           <h1 className="text-2xl font-bold text-[#2C2A29] mb-2" style={{ fontFamily: "'Fraunces', serif" }}>
@@ -43,7 +43,7 @@ export default function ManageAppointment() {
 
         <div className="bg-[#F3EFE9]/40 rounded-2xl p-6 border border-[#D1CEC4]/50 mb-8 space-y-4">
           <div className="flex items-center gap-4 border-b border-[#D1CEC4]/50 pb-4">
-            <div className="w-12 h-12 rounded-xl bg-[#C0987A] text-white flex items-center justify-center font-bold text-lg shadow-sm">
+            <div className="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center font-bold text-lg shadow-sm">
               VR
             </div>
             <div>
@@ -73,7 +73,7 @@ export default function ManageAppointment() {
         </div>
 
         <div className="space-y-3">
-          <button className="w-full py-4 px-6 rounded-xl text-white font-bold text-base hover:opacity-90 transition-all shadow-md flex items-center justify-center gap-2" style={{ background: PRIMARY }}>
+          <button className="w-full py-4 px-6 rounded-xl text-white font-bold text-base hover:opacity-90 transition-all shadow-md flex items-center justify-center gap-2" style={{ background: "var(--theme-primary, #C0987A)" }}>
             <RefreshCw className="w-5 h-5" /> Reprogramar Cita
           </button>
           

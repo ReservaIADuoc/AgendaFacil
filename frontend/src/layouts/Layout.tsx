@@ -5,7 +5,7 @@ import { Calendar, Menu, X, Sun, Moon } from "lucide-react";
 import { useTheme } from "../contexts/ThemeContext";
 import { useAuth } from "../contexts/AuthContext";
 
-const PRIMARY = "#C0987A";
+
 
 function Nav() {
   const [open, setOpen] = useState(false);
@@ -16,7 +16,7 @@ function Nav() {
     <header className="fixed top-4 left-0 right-0 z-50 px-4 flex justify-center">
       <div className="w-full max-w-6xl bg-card/80 backdrop-blur-lg border border-border shadow-sm rounded-2xl h-16 flex items-center justify-between px-5">
         <Link to="/" className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: PRIMARY }}>
+          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "var(--theme-primary, #C0987A)" }}>
             <Calendar className="w-4 h-4 text-white" />
           </div>
           <span className="text-[17px] font-bold tracking-tight text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
@@ -36,7 +36,7 @@ function Nav() {
             <Link
               to="/dashboard"
               className="px-4 py-2 rounded-xl text-[13px] font-bold text-white transition-all hover:opacity-90 shadow-sm"
-              style={{ background: PRIMARY }}
+              style={{ background: "var(--theme-primary, #C0987A)" }}
             >
               Ir al Panel de Control
             </Link>
@@ -46,7 +46,7 @@ function Nav() {
               <Link
                 to="/register"
                 className="px-4 py-2 rounded-xl text-[13px] font-bold text-white transition-all hover:opacity-90 shadow-sm"
-                style={{ background: PRIMARY }}
+                style={{ background: "var(--theme-primary, #C0987A)" }}
               >
                 Empezar gratis
               </Link>
@@ -68,13 +68,13 @@ function Nav() {
           <Link to="/pricing" onClick={() => setOpen(false)} className="block text-[14px] font-medium text-foreground py-1">Precios</Link>
           <Link to="/testimonials" onClick={() => setOpen(false)} className="block text-[14px] font-medium text-foreground py-1">Testimonios</Link>
           {token ? (
-            <Link to="/dashboard" onClick={() => setOpen(false)} className="flex justify-center w-full py-3 rounded-xl text-[14px] font-bold text-white" style={{ background: PRIMARY }}>
+            <Link to="/dashboard" onClick={() => setOpen(false)} className="flex justify-center w-full py-3 rounded-xl text-[14px] font-bold text-white" style={{ background: "var(--theme-primary, #C0987A)" }}>
               Ir al Panel de Control
             </Link>
           ) : (
             <>
               <Link to="/login" onClick={() => setOpen(false)} className="block text-[14px] font-medium text-foreground py-1">Iniciar sesión</Link>
-              <Link to="/register" onClick={() => setOpen(false)} className="flex justify-center w-full py-3 rounded-xl text-[14px] font-bold text-white" style={{ background: PRIMARY }}>
+              <Link to="/register" onClick={() => setOpen(false)} className="flex justify-center w-full py-3 rounded-xl text-[14px] font-bold text-white" style={{ background: "var(--theme-primary, #C0987A)" }}>
                 Empezar gratis
               </Link>
             </>
@@ -97,7 +97,7 @@ function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-4 gap-8 mb-10">
           <div>
             <Link to="/" className="flex items-center gap-2 mb-4">
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: PRIMARY }}>
+              <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: "var(--theme-primary, #C0987A)" }}>
                 <Calendar className="w-3.5 h-3.5 text-white" />
               </div>
               <span className="text-[15px] font-bold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>Agenda Fácil</span>

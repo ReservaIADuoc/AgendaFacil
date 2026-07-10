@@ -12,8 +12,10 @@ import { useClients } from "../hooks/useClients";
 import { useAuth, API_BASE_URL } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
 import "react-day-picker/dist/style.css";
+import { motion, AnimatePresence } from "framer-motion";
+import BackgroundBlobs from "../components/shared/BackgroundBlobs";
 
-const SERVICE_COLORS = ["#C0987A", "#D9A05B", "#A9B3A2", "#7E9E87", "#B8936A"];
+const SERVICE_COLORS = ["var(--theme-primary, #C0987A)", "#D9A05B", "#A9B3A2", "#7E9E87", "#B8936A"];
 
 const DAYS_ORDER = ["MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY", "SUNDAY"];
 const DAY_INDEX_TO_NAME = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
@@ -215,10 +217,23 @@ export default function Dashboard() {
       : format(currentDate, "EEEE d 'de' MMMM yyyy", { locale: es });
 
   return (
-    <div className="flex-1 flex h-full bg-background overflow-hidden animate-in fade-in duration-300">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="flex-1 flex h-full bg-background overflow-hidden relative"
+    >
+      <BackgroundBlobs />
       {/* Config sidebar */}
+      <AnimatePresence>
       {sidebarOpen && (
-        <aside className="hidden lg:flex w-80 xl:w-96 border-r border-border bg-card flex-col shrink-0 overflow-y-auto pb-8">
+        <motion.aside 
+          initial={{ opacity: 0, x: -300 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: -300 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+          className="hidden lg:flex w-80 xl:w-96 border-r border-border glass flex-col shrink-0 overflow-y-auto pb-8 z-10"
+        >
           <div className="p-6 border-b border-border">
             <h2 className="text-[18px] font-bold text-foreground flex items-center gap-2" style={{ fontFamily: "'Fraunces', serif" }}>
               <Sliders className="w-5 h-5 text-primary" /> Configuración de Agenda
@@ -249,7 +264,7 @@ export default function Dashboard() {
               <button
                 onClick={handleSaveSchedules}
                 disabled={isSavingSchedules}
-                className="px-3 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-bold flex items-center gap-1.5 shadow-sm hover:opacity-90 active:scale-95 transition-all cursor-pointer disabled:opacity-50"
+                className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold flex items-center gap-2 shadow-md hover:shadow-lg hover:-translate-y-0.5 active:scale-95 transition-all duration-300 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-md"
               >
                 <Save className="w-3.5 h-3.5" />
                 {isSavingSchedules ? "Guardando..." : "Guardar"}
@@ -333,9 +348,9 @@ export default function Dashboard() {
                     </div>
                     <button
                       onClick={() => toggleStatus(svc.id)}
-                      className={`p-1.5 rounded-lg border transition-all cursor-pointer active:scale-95 ${
+                      className={`p-2 rounded-xl border transition-all duration-300 cursor-pointer active:scale-95 ${
                         isSvcActive
-                          ? "border-[#C0987A]/30 bg-[#C0987A]/10 text-primary hover:bg-[#C0987A]/20"
+                          ? "border-primary/30 bg-primary/10 text-primary hover:bg-primary/20 hover:shadow-md"
                           : "border-border bg-muted/50 text-muted-foreground hover:bg-muted"
                       }`}
                       title={isSvcActive ? "Desactivar de reserva pública" : "Activar en reserva pública"}
@@ -350,16 +365,17 @@ export default function Dashboard() {
               )}
             </div>
           </div>
-        </aside>
+        </motion.aside>
       )}
+      </AnimatePresence>
 
       {/* Calendar main area */}
-      <main className="flex-1 flex flex-col h-full bg-background overflow-hidden min-w-0">
+      <main className="flex-1 flex flex-col h-full bg-transparent overflow-hidden min-w-0 z-10">
         <header className="h-20 border-b border-border flex items-center justify-between px-4 md:px-8 bg-card shrink-0 gap-3">
           <div className="flex items-center gap-3 min-w-0">
             <button
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 hover:bg-accent rounded-lg text-muted-foreground transition-colors cursor-pointer hidden lg:flex"
+              className="p-2.5 hover:bg-muted rounded-xl text-muted-foreground transition-all duration-300 cursor-pointer hidden lg:flex hover:text-foreground"
               title={sidebarOpen ? "Ocultar configuración" : "Mostrar configuración"}
             >
               {sidebarOpen ? <PanelLeftClose className="w-5 h-5" /> : <PanelLeft className="w-5 h-5" />}
@@ -375,16 +391,16 @@ export default function Dashboard() {
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
             <button
               onClick={handleToday}
-              className="px-3 md:px-4 py-2 border border-input rounded-lg font-bold text-sm hover:bg-accent transition-colors text-foreground cursor-pointer"
+              className="px-4 py-2 border border-border rounded-xl font-bold text-sm hover:bg-muted transition-all duration-300 hover:shadow-sm text-foreground cursor-pointer"
             >
               Hoy
             </button>
-            <div className="flex items-center gap-1">
-              <button onClick={() => handleNavigate(-1)} className="p-1.5 hover:bg-accent rounded-full text-muted-foreground transition-colors cursor-pointer">
-                <ChevronLeft className="w-5 h-5" />
+            <div className="flex items-center gap-1 bg-muted/30 p-1 rounded-2xl border border-border/50">
+              <button onClick={() => handleNavigate(-1)} className="p-2 hover:bg-card rounded-xl text-muted-foreground transition-all duration-300 cursor-pointer hover:shadow-sm">
+                <ChevronLeft className="w-4 h-4" />
               </button>
-              <button onClick={() => handleNavigate(1)} className="p-1.5 hover:bg-accent rounded-full text-muted-foreground transition-colors cursor-pointer">
-                <ChevronRight className="w-5 h-5" />
+              <button onClick={() => handleNavigate(1)} className="p-2 hover:bg-card rounded-xl text-muted-foreground transition-all duration-300 cursor-pointer hover:shadow-sm">
+                <ChevronRight className="w-4 h-4" />
               </button>
             </div>
             <h2 className="text-sm md:text-base font-medium capitalize text-foreground hidden sm:block max-w-[200px] md:max-w-none truncate">
@@ -444,7 +460,7 @@ export default function Dashboard() {
         </div>
 
         {/* Time grid */}
-        <div ref={gridContainerRef} className="flex-1 overflow-y-auto bg-card relative">
+        <div ref={gridContainerRef} className="flex-1 overflow-y-auto bg-transparent relative">
           {loading && (
             <div className="absolute inset-0 z-30 bg-card/70 flex items-center justify-center">
               <Loader2 className="w-8 h-8 text-primary animate-spin" />
@@ -498,9 +514,12 @@ export default function Dashboard() {
                     const endTime = format(new Date(2000, 0, 1, hour, min + event.duration * 60), "HH:mm");
 
                     return (
-                      <div
+                      <motion.div
+                        initial={{ opacity: 0, scale: 0.9 }}
+                        animate={{ opacity: 1, scale: 1 }}
+                        transition={{ duration: 0.4, delay: eventIdx * 0.05 }}
                         key={event.id}
-                        className="absolute left-1 right-1 rounded-2xl p-2 md:p-3 shadow-md text-xs overflow-hidden hover:shadow-lg cursor-pointer border border-white/10 transition-all hover:scale-[1.01] hover:z-20 z-10 flex flex-col justify-between text-white"
+                        className="absolute left-1 right-1 rounded-2xl p-2 md:p-3 shadow-md text-xs overflow-hidden hover:shadow-xl cursor-pointer border border-white/20 transition-all duration-300 hover:scale-[1.03] hover:z-20 z-10 flex flex-col justify-between text-white"
                         style={{ top: `${topPosition}px`, height: `${height}px`, background: color }}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -515,7 +534,7 @@ export default function Dashboard() {
                           <Clock className="w-3 h-3" />
                           {event.time} – {endTime}
                         </div>
-                      </div>
+                      </motion.div>
                     );
                   })}
                 </div>
@@ -524,21 +543,31 @@ export default function Dashboard() {
           </div>
 
           {isEmpty && (
-            <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-              <div className="bg-card p-8 rounded-3xl shadow-xl border border-border flex flex-col items-center text-center max-w-sm pointer-events-auto mx-4">
-                <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center text-primary mb-4">
-                  <CalendarIcon className="w-8 h-8" />
+            <motion.div 
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5 }}
+              className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none bg-background/20 backdrop-blur-[2px]"
+            >
+              <motion.div 
+                initial={{ scale: 0.9 }}
+                animate={{ scale: 1 }}
+                transition={{ duration: 0.5, type: "spring" }}
+                className="glass-heavy p-10 rounded-[2.5rem] flex flex-col items-center text-center max-w-sm pointer-events-auto mx-4"
+              >
+                <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6 shadow-inner">
+                  <CalendarIcon className="w-10 h-10" />
                 </div>
-                <h3 className="text-xl font-bold text-foreground mb-2" style={{ fontFamily: "'Fraunces', serif" }}>
+                <h3 className="text-2xl font-bold text-foreground mb-3" style={{ fontFamily: "'Fraunces', serif" }}>
                   Tu agenda está libre
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-[15px] text-muted-foreground leading-relaxed">
                   {viewMode === "week"
                     ? "No tienes citas programadas para esta semana."
                     : "No tienes citas para este día."}
                 </p>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           )}
         </div>
       </main>
@@ -559,6 +588,6 @@ export default function Dashboard() {
         onUpdate={updateAppointment}
         onDelete={deleteAppointment}
       />
-    </div>
+    </motion.div>
   );
 }

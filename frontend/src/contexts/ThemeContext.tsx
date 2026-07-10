@@ -5,6 +5,8 @@ type Theme = "light" | "dark";
 interface ThemeContextProps {
   theme: Theme;
   toggleTheme: () => void;
+  accentColor: string;
+  setAccentColor: (color: string) => void;
 }
 
 const ThemeContext = createContext<ThemeContextProps | undefined>(undefined);
@@ -19,6 +21,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return "light";
   });
 
+  const [accentColor, setAccentColorState] = useState<string>(() => {
+    return localStorage.getItem("accentColor") || "#C0987A";
+  });
+
   useEffect(() => {
     localStorage.setItem("theme", theme);
     if (theme === "dark") {
@@ -28,12 +34,21 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     }
   }, [theme]);
 
+  useEffect(() => {
+    localStorage.setItem("accentColor", accentColor);
+    document.documentElement.style.setProperty("--theme-primary", accentColor);
+  }, [accentColor]);
+
   const toggleTheme = () => {
     setTheme((prev) => (prev === "light" ? "dark" : "light"));
   };
 
+  const setAccentColor = (color: string) => {
+    setAccentColorState(color);
+  };
+
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, accentColor, setAccentColor }}>
       {children}
     </ThemeContext.Provider>
   );

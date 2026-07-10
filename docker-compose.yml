@@ -38,7 +38,7 @@ services:
     networks:
       - agendafacil-net
     environment:
-      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
     # usa la base de datos postgres en railway definida en su application.properties,
     # no levanta una base de datos local.
 
