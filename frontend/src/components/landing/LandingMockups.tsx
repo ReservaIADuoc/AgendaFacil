@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-const PRIMARY = "#C0987A";
+
 const ACCENT = "#A9B3A2";
 
 export function BookingMockup() {
@@ -10,7 +10,7 @@ export function BookingMockup() {
     <div className="bg-white rounded-2xl shadow-2xl border border-black/5 overflow-hidden w-full max-w-sm mx-auto">
       <div className="px-5 py-4 border-b border-gray-100">
         <div className="flex items-center gap-3 mb-3">
-          <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ background: PRIMARY }}>VR</div>
+          <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-sm font-bold" style={{ background: "var(--theme-primary, #C0987A)" }}>VR</div>
           <div>
             <p className="text-[13px] font-semibold text-gray-900">Valentina Rojas</p>
             <p className="text-[11px] text-gray-500">Psicóloga Clínica · 50 min</p>
@@ -24,7 +24,7 @@ export function BookingMockup() {
           {[null,null,null,null,null,null,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30].map((d,i) => (
             <div key={i} className={`h-7 flex items-center justify-center text-[11px] rounded-full cursor-pointer font-medium transition-all
               ${d === 22 ? "text-white shadow-sm" : d ? "text-gray-700 hover:bg-[#F3EFE9]" : ""}
-            `} style={d === 22 ? { background: PRIMARY } : {}}>
+            `} style={d === 22 ? { background: "var(--theme-primary, #C0987A)" } : {}}>
               {d}
             </div>
           ))}
@@ -39,9 +39,9 @@ export function BookingMockup() {
               onClick={() => setSelected(s)}
               className="py-1.5 rounded-lg text-[11px] font-semibold transition-all border"
               style={{
-                background: selected === s ? PRIMARY : "transparent",
+                background: selected === s ? "var(--theme-primary, #C0987A)" : "transparent",
                 color: selected === s ? "#fff" : "#374151",
-                borderColor: selected === s ? PRIMARY : "#E5E7EB",
+                borderColor: selected === s ? "var(--theme-primary, #C0987A)" : "#E5E7EB",
               }}
             >{s}</button>
           ))}
@@ -60,7 +60,7 @@ export function ReminderMockup() {
       {[
         { icon: "💬", channel: "WhatsApp", time: "24h antes", msg: "Hola María, mañana tienes cita con Valentina a las 10:00. ¿Confirmas?", color: "#25D366" },
         { icon: "📧", channel: "Email", time: "2h antes", msg: "Recordatorio: tu sesión de psicología es en 2 horas.", color: "#4F46E5" },
-        { icon: "📱", channel: "SMS", time: "30min antes", msg: "Tu cita empieza en 30 minutos. ¡No llegues tarde!", color: PRIMARY },
+        { icon: "📱", channel: "SMS", time: "30min antes", msg: "Tu cita empieza en 30 minutos. ¡No llegues tarde!", color: "var(--theme-primary, #C0987A)" },
       ].map(r => (
         <div key={r.channel} className="bg-white rounded-2xl shadow-lg border border-black/5 p-4 flex gap-3 items-start">
           <div className="w-10 h-10 rounded-xl flex items-center justify-center text-lg flex-shrink-0" style={{ background: r.color + "15" }}>
@@ -81,7 +81,7 @@ export function ReminderMockup() {
 
 export function ClientMockup() {
   const clients = [
-    { name: "María García", sessions: 14, next: "Hoy 10:00", status: "Al día", initials: "MG", hue: PRIMARY },
+    { name: "María García", sessions: 14, next: "Hoy 10:00", status: "Al día", initials: "MG", hue: "var(--theme-primary, #C0987A)" },
     { name: "Carlos Ruiz", sessions: 8, next: "Jue 11:30", status: "Pago pendiente", initials: "CR", hue: "#F59E0B" },
     { name: "Ana Martínez", sessions: 3, next: "Vie 09:00", status: "Al día", initials: "AM", hue: "#A9B3A2" },
     { name: "Luis Fernández", sessions: 21, next: "Lun 14:00", status: "Al día", initials: "LF", hue: "#D9A05B" },
@@ -90,7 +90,7 @@ export function ClientMockup() {
     <div className="bg-white rounded-2xl shadow-2xl border border-black/5 overflow-hidden w-full max-w-sm mx-auto">
       <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
         <span className="text-[13px] font-bold text-gray-900">Mis clientes</span>
-        <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold" style={{ background: PRIMARY + "15", color: PRIMARY }}>48 activos</span>
+        <span className="text-[11px] px-2.5 py-1 rounded-full font-semibold" style={{ background: "var(--theme-primary, #C0987A)" + "15", color: "var(--theme-primary, #C0987A)" }}>48 activos</span>
       </div>
       <div className="divide-y divide-gray-50">
         {clients.map(c => (

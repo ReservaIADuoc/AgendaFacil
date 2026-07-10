@@ -3,8 +3,10 @@ import { Calendar } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useToast } from "../contexts/ToastContext";
+import { motion } from "framer-motion";
+import BackgroundBlobs from "../components/shared/BackgroundBlobs";
 
-const PRIMARY = "#C0987A";
+
 
 export default function Register() {
   const [name, setName] = useState("");
@@ -41,10 +43,17 @@ export default function Register() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background px-4" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
-      <div className="w-full max-w-md bg-card rounded-3xl p-8 shadow-xl border border-border animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <Link to="/" className="flex items-center justify-center gap-2 mb-8">
-          <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: PRIMARY }}>
+    <div className="min-h-screen flex items-center justify-center bg-background px-4 relative overflow-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <BackgroundBlobs />
+      
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95, y: 30 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+        className="w-full max-w-md glass-heavy rounded-[2.5rem] p-8 sm:p-10 relative z-10"
+      >
+        <Link to="/" className="flex items-center justify-center gap-2 mb-8 group">
+          <div className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform duration-500 group-hover:rotate-[360deg] group-hover:scale-110 shadow-lg shadow-primary/20" style={{ background: "var(--theme-primary, #C0987A)" }}>
             <Calendar className="w-5 h-5 text-white" />
           </div>
           <span className="text-[22px] font-bold tracking-tight text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>
@@ -66,7 +75,7 @@ export default function Register() {
               required 
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-border bg-muted/50 focus:bg-card focus:ring-2 focus:ring-[#C0987A] focus:border-transparent outline-none transition-all text-foreground placeholder-muted-foreground" 
+              className="w-full px-5 py-3.5 rounded-2xl border border-border/60 bg-muted/30 focus:bg-card focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all duration-300 text-foreground placeholder-muted-foreground shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] hover:border-border hover:shadow-inner" 
               placeholder="Ej. Dra. Ana Gómez" 
             />
           </div>
@@ -77,7 +86,7 @@ export default function Register() {
               required 
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-border bg-muted/50 focus:bg-card focus:ring-2 focus:ring-[#C0987A] focus:border-transparent outline-none transition-all text-foreground placeholder-muted-foreground" 
+              className="w-full px-5 py-3.5 rounded-2xl border border-border/60 bg-muted/30 focus:bg-card focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all duration-300 text-foreground placeholder-muted-foreground shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] hover:border-border hover:shadow-inner" 
               placeholder="tu@correo.com" 
             />
           </div>
@@ -88,7 +97,7 @@ export default function Register() {
               required 
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 rounded-xl border border-border bg-muted/50 focus:bg-card focus:ring-2 focus:ring-[#C0987A] focus:border-transparent outline-none transition-all text-foreground placeholder-muted-foreground" 
+              className="w-full px-5 py-3.5 rounded-2xl border border-border/60 bg-muted/30 focus:bg-card focus:ring-2 focus:ring-primary/40 focus:border-primary outline-none transition-all duration-300 text-foreground placeholder-muted-foreground shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] hover:border-border hover:shadow-inner" 
               placeholder="••••••••" 
             />
           </div>
@@ -96,8 +105,7 @@ export default function Register() {
           <button 
             type="submit" 
             disabled={loading}
-            className="w-full flex justify-center py-3.5 px-4 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90 shadow-md cursor-pointer disabled:opacity-50" 
-            style={{ background: PRIMARY }}
+            className="w-full flex justify-center py-4 px-4 rounded-2xl text-[15px] font-bold text-white bg-gradient-to-r from-primary to-primary/80 transition-all duration-500 hover:-translate-y-1 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50 cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0 disabled:hover:shadow-none" 
           >
             {loading ? "Creando cuenta..." : "Crear cuenta y continuar"}
           </button>
@@ -105,11 +113,11 @@ export default function Register() {
 
         <p className="mt-8 text-center text-sm text-muted-foreground">
           ¿Ya tienes una cuenta?{' '}
-          <Link to="/login" className="font-semibold transition-colors hover:text-foreground" style={{ color: PRIMARY }}>
+          <Link to="/login" className="font-semibold transition-colors hover:text-[#A9B3A2] relative after:absolute after:bottom-0 after:left-0 after:w-full after:h-[1px] after:bg-[#A9B3A2] after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300 after:origin-left" style={{ color: "var(--theme-primary, #C0987A)" }}>
             Inicia sesión
           </Link>
         </p>
-      </div>
+      </motion.div>
     </div>
   );
 }

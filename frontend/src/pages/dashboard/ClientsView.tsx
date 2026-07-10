@@ -7,8 +7,22 @@ import { useClientNotes } from "../../hooks/useClientNotes";
 import { useClientAttachments } from "../../hooks/useClientAttachments";
 import CreateClientModal from "../../components/dashboard/CreateClientModal";
 import { useAuth } from "../../contexts/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
 
-const PRIMARY = "#C0987A";
+
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 15 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
+};
 
 export default function ClientsView() {
   const { clients, addClient, updateClient, deleteClient } = useClients();
@@ -103,7 +117,12 @@ export default function ClientsView() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-background animate-in fade-in duration-300">
+    <motion.div 
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+      className="flex-1 flex flex-col h-full bg-background relative"
+    >
 
       {/* Header */}
       <div className="h-20 border-b border-border flex items-center justify-between px-8 bg-card shrink-0">
@@ -121,18 +140,18 @@ export default function ClientsView() {
           </button>
           <button 
             onClick={() => setClientModalOpen(true)}
-            className="px-5 py-2.5 rounded-xl font-bold text-white shadow-sm hover:opacity-90 transition-all flex items-center gap-2 cursor-pointer" 
-            style={{ background: PRIMARY }}
+            className="px-5 py-2.5 rounded-2xl font-bold text-white shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 flex items-center gap-2 cursor-pointer" 
+            style={{ background: "var(--theme-primary, #C0987A)" }}
           >
             Añadir Cliente
           </button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden flex flex-col md:flex-row p-6 gap-6">
+      <div className="flex-1 overflow-hidden flex flex-col md:flex-row p-6 gap-6 relative z-10">
 
         {/* Clients List Area */}
-        <div className={`flex-1 flex flex-col bg-card rounded-3xl border border-border shadow-sm overflow-hidden ${selectedClient ? 'hidden md:flex' : 'flex'}`}>
+        <div className={`flex-1 flex flex-col glass-heavy rounded-[2.5rem] shadow-md overflow-hidden ${selectedClient ? 'hidden md:flex' : 'flex'}`}>
 
           {/* Toolbar */}
           <div className="p-4 border-b border-border flex gap-3">
@@ -163,9 +182,15 @@ export default function ClientsView() {
                   <th className="px-6 py-4 font-medium text-right"></th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-border">
+              <motion.tbody 
+                variants={staggerContainer}
+                initial="hidden"
+                animate="show"
+                className="divide-y divide-border"
+              >
                 {filteredClients.map(client => (
-                  <tr
+                  <motion.tr
+                    variants={fadeUp}
                     key={client.id}
                     onClick={() => setSelectedClient(client)}
                     className={`hover:bg-muted/50 cursor-pointer transition-colors ${selectedClient?.id === client.id ? 'bg-muted/80' : ''}`}
@@ -217,9 +242,9 @@ export default function ClientsView() {
                         </button>
                       </div>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))}
-              </tbody>
+              </motion.tbody>
             </table>
 
             {filteredClients.length === 0 && !showEmptyState && (
@@ -230,14 +255,14 @@ export default function ClientsView() {
 
             {/* Empty State */}
             {showEmptyState && (
-              <div className="flex flex-col items-center justify-center text-center py-20 px-4 animate-in fade-in duration-500">
-                <div className="w-24 h-24 bg-muted rounded-full flex items-center justify-center text-primary mb-6 shadow-sm">
+              <div className="flex flex-col items-center justify-center text-center py-20 px-4 animate-in fade-in duration-500 h-full bg-background/20 backdrop-blur-sm">
+                <div className="w-24 h-24 bg-primary/10 rounded-full flex items-center justify-center text-primary mb-6 shadow-inner">
                   <Users className="w-10 h-10" />
                 </div>
-                <h3 className="text-2xl font-bold text-foreground mb-2" style={{ fontFamily: "'Fraunces', serif" }}>
+                <h3 className="text-2xl font-bold text-foreground mb-3" style={{ fontFamily: "'Fraunces', serif" }}>
                   Aún no tienes clientes
                 </h3>
-                <p className="text-muted-foreground max-w-sm mb-8 text-sm">
+                <p className="text-muted-foreground max-w-md mb-8 text-[15px] leading-relaxed">
                   Comparte tu enlace de reserva en tus redes sociales o WhatsApp para conseguir tu primera cita de forma automática.
                 </p>
                 <button
@@ -245,9 +270,9 @@ export default function ClientsView() {
                     navigator.clipboard.writeText(`${window.location.origin}/book/${user?.usernameSlug || "valentina-rojas"}`);
                     showToast("Enlace de reserva copiado al portapapeles");
                   }}
-                  className="px-6 py-3 rounded-xl font-bold text-white shadow-md hover:opacity-90 transition-all flex items-center gap-2" style={{ background: PRIMARY }}
+                  className="px-6 py-4 rounded-2xl font-bold text-white shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-2 cursor-pointer" style={{ background: "var(--theme-primary, #C0987A)" }}
                 >
-                  <Calendar className="w-4 h-4" /> Copiar enlace de reserva
+                  <Calendar className="w-5 h-5" /> Copiar enlace de reserva
                 </button>
               </div>
             )}
@@ -255,9 +280,15 @@ export default function ClientsView() {
         </div>
 
         {/* Client Detail Sidebar */}
-        {/* Client Detail Sidebar */}
+        <AnimatePresence>
         {selectedClient && (
-          <div className="w-full md:w-[450px] lg:w-[500px] flex-shrink-0 bg-card rounded-3xl border border-border shadow-sm flex flex-col overflow-hidden animate-in slide-in-from-right-8 duration-300">
+          <motion.div 
+            initial={{ opacity: 0, x: 200 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 200 }}
+            transition={{ type: "spring", stiffness: 200, damping: 25 }}
+            className="w-full md:w-[450px] lg:w-[500px] flex-shrink-0 glass-heavy rounded-[2.5rem] shadow-2xl flex flex-col overflow-hidden z-10"
+          >
             <div className="p-6 border-b border-border flex flex-col items-center text-center relative">
               <button
                 onClick={() => setSelectedClient(null)}
@@ -282,7 +313,7 @@ export default function ClientsView() {
               <div className="flex gap-2 mt-2 w-full">
                 <button 
                   onClick={() => setClientToEdit(selectedClient)}
-                  className="flex-1 py-2 px-4 bg-[#C0987A]/10 hover:bg-[#C0987A]/20 text-[#C0987A] rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
+                  className="flex-1 py-2 px-4 bg-primary/10 hover:bg-primary/20 text-primary rounded-xl text-sm font-bold transition-colors flex items-center justify-center gap-2 cursor-pointer"
                 >
                   Editar Perfil
                 </button>
@@ -324,10 +355,17 @@ export default function ClientsView() {
               </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-6 bg-card">
-
+            <div className="flex-1 overflow-y-auto p-6 bg-transparent">
+              <AnimatePresence mode="wait">
               {activeTab === 'citas' && (
-                <div className="space-y-6 animate-in fade-in">
+                <motion.div 
+                  key="citas"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="space-y-6"
+                >
                   <div>
                     <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider mb-3">Últimas Citas</h3>
                     <div className="space-y-3">
@@ -353,16 +391,23 @@ export default function ClientsView() {
                       )}
                     </div>
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {activeTab === 'notas' && (
-                <div className="h-full flex flex-col gap-4 animate-in fade-in">
+                <motion.div 
+                  key="notas"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="h-full flex flex-col gap-4"
+                >
                   <div className="flex items-center justify-between">
                     <h3 className="text-xs font-bold text-muted-foreground uppercase tracking-wider">Notas de Evolución</h3>
                     <button
                       onClick={() => showToast("La IA está resumiendo el historial del paciente...")}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#C0987A]/10 text-[#C0987A] text-xs font-bold hover:bg-[#C0987A]/20 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary text-xs font-bold hover:bg-primary/20 transition-colors"
                     >
                       <Sparkles className="w-3.5 h-3.5" />
                       Resumir con IA
@@ -377,7 +422,7 @@ export default function ClientsView() {
                           <p className="text-xs text-foreground whitespace-pre-wrap line-clamp-3">{note.contentMarkdown}</p>
                           <p className="text-[10px] text-muted-foreground mt-1">
                             {new Date(note.createdAt).toLocaleDateString("es-CL", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                            {note.isAiAssisted && <span className="ml-2 text-[#C0987A]">✦ IA</span>}
+                            {note.isAiAssisted && <span className="ml-2 text-primary">✦ IA</span>}
                           </p>
                         </div>
                       ))}
@@ -407,11 +452,18 @@ export default function ClientsView() {
                       {saving ? "Guardando..." : "Guardar Nota"}
                     </button>
                   </div>
-                </div>
+                </motion.div>
               )}
 
               {activeTab === 'archivos' && (
-                <div className="animate-in fade-in py-4 space-y-4">
+                <motion.div 
+                  key="archivos"
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.3 }}
+                  className="py-4 space-y-4"
+                >
                   <div className="flex justify-between items-center pb-2 border-b border-border">
                     <h4 className="font-bold text-foreground text-sm">Archivos del Paciente</h4>
                     <button
@@ -442,7 +494,7 @@ export default function ClientsView() {
                       {attachments.map((file) => (
                         <div key={file.id} className="flex items-center justify-between p-3 bg-muted/40 rounded-xl border border-border">
                           <div className="flex items-center gap-3">
-                            <Paperclip className="w-4 h-4 text-[#C0987A]" />
+                            <Paperclip className="w-4 h-4 text-primary" />
                             <div className="text-left">
                               <div className="text-xs font-bold text-foreground truncate max-w-[160px]">{file.originalFilename}</div>
                               <div className="text-[10px] text-muted-foreground">
@@ -455,12 +507,13 @@ export default function ClientsView() {
                       ))}
                     </div>
                   )}
-                </div>
+                </motion.div>
               )}
-
+              </AnimatePresence>
             </div>
-          </div>
+          </motion.div>
         )}
+        </AnimatePresence>
 
       </div>
       <CreateClientModal isOpen={isClientModalOpen} onClose={() => setClientModalOpen(false)} onSave={handleAddClient} />
@@ -477,6 +530,6 @@ export default function ClientsView() {
         onChange={handleFileUpload}
         accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
       />
-    </div>
+    </motion.div>
   );
 }

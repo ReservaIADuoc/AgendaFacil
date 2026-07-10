@@ -126,7 +126,7 @@ export default function CopilotChat({ mode = "professional", username }: { mode?
       {/* Floating Button */}
       <button 
         onClick={() => setIsOpen(!isOpen)}
-        className={`fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 z-50 ${isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'} bg-gradient-to-tr from-[#C0987A] to-[#D9A05B] hover:scale-110 hover:shadow-[0_0_20px_rgba(192,152,122,0.5)]`}
+        className={`fixed bottom-6 right-6 w-14 h-14 rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 z-50 ${isOpen ? 'scale-0 opacity-0' : 'scale-100 opacity-100'} bg-gradient-to-tr from-primary to-primary/80 hover:scale-110 hover:shadow-[0_0_20px_rgba(192,152,122,0.5)]`}
       >
         <Sparkles className="w-6 h-6 text-white" />
       </button>
@@ -135,7 +135,7 @@ export default function CopilotChat({ mode = "professional", username }: { mode?
       <div className={`fixed bottom-6 right-6 w-[360px] h-[550px] bg-card border border-border rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden transition-all duration-300 origin-bottom-right ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'}`}>
         
         {/* Header */}
-        <div className="bg-gradient-to-r from-[#C0987A] to-[#D9A05B] p-4 flex items-center justify-between shrink-0">
+        <div className="bg-gradient-to-r from-primary to-primary/80 p-4 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md">
               <Sparkles className="w-4 h-4 text-white" />
@@ -154,11 +154,11 @@ export default function CopilotChat({ mode = "professional", username }: { mode?
         <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-muted/20">
           {messages.map(msg => (
             <div key={msg.id} className={`flex gap-3 max-w-[85%] ${msg.role === 'user' ? 'ml-auto flex-row-reverse' : ''}`}>
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'ai' ? 'bg-[#C0987A]/20 text-[#C0987A] dark:bg-[#C0987A]/10' : 'bg-muted text-muted-foreground'}`}>
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'ai' ? 'bg-primary/20 text-primary dark:bg-primary/10' : 'bg-muted text-muted-foreground'}`}>
                 {msg.role === 'ai' ? <Sparkles className="w-3.5 h-3.5" /> : <User className="w-3.5 h-3.5" />}
               </div>
               <div className="flex flex-col gap-2">
-                <div className={`p-3 rounded-2xl text-[13px] leading-relaxed shadow-sm ${msg.role === 'user' ? 'bg-[#C0987A] text-white rounded-tr-none' : 'bg-card border border-border text-foreground rounded-tl-none'}`}>
+                <div className={`p-3 rounded-2xl text-[13px] leading-relaxed shadow-sm ${msg.role === 'user' ? 'bg-primary text-white rounded-tr-none' : 'bg-card border border-border text-foreground rounded-tl-none'}`}>
                   {msg.text}
                 </div>
                 
@@ -166,7 +166,7 @@ export default function CopilotChat({ mode = "professional", username }: { mode?
                 {msg.isActionCard && (
                   <div className="bg-card border border-border rounded-xl p-3 shadow-sm animate-in slide-in-from-bottom-2">
                     <div className="flex items-center gap-2 mb-2">
-                      <Calendar className="w-4 h-4 text-[#C0987A]" />
+                      <Calendar className="w-4 h-4 text-primary" />
                       <span className="text-xs font-bold text-foreground">Sugerencia de Cita</span>
                     </div>
                     <div className="text-xs text-muted-foreground mb-3">Jueves, 15:00 hrs<br/>Terapia Individual - 45 min</div>
@@ -176,7 +176,7 @@ export default function CopilotChat({ mode = "professional", username }: { mode?
                           e.currentTarget.innerText = "¡Confirmada!";
                           e.currentTarget.classList.add("bg-green-100", "text-green-700");
                         }}
-                        className="flex-1 py-1.5 bg-[#C0987A]/10 text-[#C0987A] hover:bg-[#C0987A]/20 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1"
+                        className="flex-1 py-1.5 bg-primary/10 text-primary hover:bg-primary/20 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1"
                       >
                         <Check className="w-3 h-3" /> Confirmar
                       </button>
@@ -188,13 +188,13 @@ export default function CopilotChat({ mode = "professional", username }: { mode?
           ))}
           {isTyping && (
              <div className="flex gap-3 max-w-[85%]">
-               <div className="w-7 h-7 rounded-full bg-[#C0987A]/20 text-[#C0987A] flex items-center justify-center shrink-0">
+               <div className="w-7 h-7 rounded-full bg-primary/20 text-primary flex items-center justify-center shrink-0">
                  <Sparkles className="w-3.5 h-3.5" />
                </div>
                <div className="p-3 bg-card border border-border rounded-2xl rounded-tl-none shadow-sm flex items-center gap-1">
-                 <span className="w-1.5 h-1.5 bg-[#C0987A]/60 rounded-full animate-bounce"></span>
-                 <span className="w-1.5 h-1.5 bg-[#C0987A]/60 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></span>
-                 <span className="w-1.5 h-1.5 bg-[#C0987A]/60 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></span>
+                 <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce"></span>
+                 <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: "0.2s" }}></span>
+                 <span className="w-1.5 h-1.5 bg-primary/60 rounded-full animate-bounce" style={{ animationDelay: "0.4s" }}></span>
                </div>
              </div>
           )}
@@ -203,7 +203,7 @@ export default function CopilotChat({ mode = "professional", username }: { mode?
 
         {/* Input */}
         <div className="p-3 bg-card border-t border-border shrink-0">
-          <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-xl px-3 py-2 focus-within:border-[#C0987A] focus-within:ring-1 focus-within:ring-[#C0987A] transition-all">
+          <div className="flex items-center gap-2 bg-muted/50 border border-border rounded-xl px-3 py-2 focus-within:border-primary focus-within:ring-1 focus-within:ring-primary transition-all">
             <input 
               type="text" 
               placeholder="Pide a la IA que agende, resuma..." 
@@ -215,7 +215,7 @@ export default function CopilotChat({ mode = "professional", username }: { mode?
             <button 
               onClick={handleSend}
               disabled={!input.trim()}
-              className="p-1.5 rounded-lg bg-[#C0987A] text-white disabled:opacity-50 transition-opacity"
+              className="p-1.5 rounded-lg bg-primary text-white disabled:opacity-50 transition-opacity"
             >
               <Send className="w-4 h-4" />
             </button>

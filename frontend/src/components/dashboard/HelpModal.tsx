@@ -1,6 +1,6 @@
 import { X, BookOpen, MessageSquare, ExternalLink } from "lucide-react";
 
-const PRIMARY = "#C0987A";
+
 
 export default function HelpModal({ isOpen, onClose }: { isOpen: boolean, onClose: () => void }) {
   if (!isOpen) return null;
@@ -12,9 +12,9 @@ export default function HelpModal({ isOpen, onClose }: { isOpen: boolean, onClos
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/40 backdrop-blur-sm p-4 transition-all">
       <div 
-        className="bg-card rounded-3xl w-full max-w-md shadow-2xl overflow-hidden border border-border animate-in fade-in zoom-in-95 duration-200 text-foreground"
+        className="bg-card/90 backdrop-blur-2xl rounded-[2.5rem] w-full max-w-md shadow-2xl shadow-primary/10 overflow-hidden border border-white/20 animate-in fade-in zoom-in-95 duration-300 text-foreground"
         style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-muted/40">
@@ -38,10 +38,10 @@ export default function HelpModal({ isOpen, onClose }: { isOpen: boolean, onClos
             href="https://github.com/patoq/AgendaFacil-back-feature" 
             target="_blank" 
             rel="noopener noreferrer" 
-            className="flex items-start gap-4 p-4 rounded-2xl border border-border hover:border-[#C0987A]/55 hover:bg-muted/10 transition-all group"
+            className="flex items-start gap-4 p-4 rounded-2xl border border-border hover:border-primary/55 hover:bg-muted/10 transition-all group"
           >
-            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 group-hover:bg-[#C0987A] transition-colors">
-              <BookOpen className="w-5 h-5 text-[#C0987A] group-hover:text-white" />
+            <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center flex-shrink-0 group-hover:bg-primary transition-colors">
+              <BookOpen className="w-5 h-5 text-primary group-hover:text-white" />
             </div>
             <div>
               <h3 className="text-sm font-bold text-foreground mb-1 flex items-center gap-2">

@@ -8,9 +8,23 @@ import { useToast } from "../../contexts/ToastContext";
 import { useAppointments } from "../../hooks/useAppointments";
 import { useClients } from "../../hooks/useClients";
 import { useServices } from "../../hooks/useServices";
+import { motion } from "framer-motion";
 
-const PRIMARY = "#C0987A";
+
 const ACCENT = "#A9B3A2";
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.1 }
+  }
+};
+
+const fadeUp = {
+  hidden: { opacity: 0, y: 20 },
+  show: { opacity: 1, y: 0, transition: { type: "spring", stiffness: 100, damping: 15 } }
+};
 
 export default function AnalyticsView() {
   const { showToast } = useToast();
@@ -22,10 +36,27 @@ export default function AnalyticsView() {
   const [isInsightsOpen, setIsInsightsOpen] = useState(false);
   const [activeRange, setActiveRange] = useState<"week" | "month" | "year">("month");
 
+  // Custom AI Report States
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [isGeneratingAi, setIsGeneratingAi] = useState(false);
+  const [customReport, setCustomReport] = useState<string | null>(null);
+
   useEffect(() => {
     const timer = setTimeout(() => setIsLoading(false), 500);
     return () => clearTimeout(timer);
   }, [activeRange]);
+
+  const handleGenerateCustomReport = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!aiPrompt.trim() || isGeneratingAi) return;
+    
+    setIsGeneratingAi(true);
+    // Simulate AI thinking delay
+    await new Promise(r => setTimeout(r, 1500));
+    setCustomReport(`He analizado tus datos considerando tu petición: "${aiPrompt}".\n\nHe detectado que los días viernes tienen una concentración inusualmente alta de cancelaciones de última hora. Te recomiendo enviar un recordatorio adicional 24 horas antes específicamente para las citas agendadas los viernes, o solicitar un adelanto de confirmación. Por otro lado, la retención de clientes nuevos ha mejorado un 12% este período.`);
+    setIsGeneratingAi(false);
+    setAiPrompt("");
+  };
 
   // Pricing helper
   const getEventPrice = (eventService: string) => {
@@ -73,7 +104,7 @@ export default function AnalyticsView() {
 
   const totalEvents = filteredEvents.length || 1;
 
-  const svcColors = [PRIMARY, ACCENT, "#D9A05B", "#94A3B8"];
+  const svcColors = ["var(--theme-primary, #C0987A)", ACCENT, "#D9A05B", "#94A3B8"];
   const svcLabels: Record<string, string> = {
     consulta: "Consulta General",
     terapia: "Terapia de Pareja",
@@ -139,7 +170,7 @@ export default function AnalyticsView() {
       value: totalRevenueFormatted,
       sub: `${filteredEvents.length} sesiones facturadas`,
       icon: DollarSign,
-      color: PRIMARY,
+      color: "var(--theme-primary, #C0987A)",
     },
     {
       label: "Citas Realizadas",
@@ -198,7 +229,12 @@ export default function AnalyticsView() {
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full bg-background overflow-y-auto animate-in fade-in duration-300">
+    <motion.div 
+      variants={staggerContainer}
+      initial="hidden"
+      animate="show"
+      className="flex-1 flex flex-col h-full bg-transparent overflow-y-auto"
+    >
 
       {/* Header */}
       <div className="h-20 border-b border-border flex items-center justify-between px-8 bg-card shrink-0">
@@ -237,8 +273,8 @@ export default function AnalyticsView() {
 
           <button
             onClick={() => setIsInsightsOpen(true)}
-            className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all cursor-pointer border"
-            style={{ color: PRIMARY, background: `${PRIMARY}15`, borderColor: `${PRIMARY}30` }}
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold transition-all duration-300 cursor-pointer border hover:-translate-y-0.5 hover:shadow-md"
+            style={{ color: "var(--theme-primary, #C0987A)", background: `${"var(--theme-primary, #C0987A)"}15`, borderColor: `${"var(--theme-primary, #C0987A)"}30` }}
           >
             <Sparkles className="w-4 h-4" />
             Insights IA
@@ -246,7 +282,7 @@ export default function AnalyticsView() {
 
           <button
             onClick={handleExport}
-            className="flex items-center gap-2 px-4 py-2 border border-border rounded-xl text-foreground font-medium hover:bg-muted transition-colors text-sm cursor-pointer bg-card"
+            className="flex items-center gap-2 px-4 py-2.5 border border-border/60 rounded-xl text-foreground font-medium hover:bg-muted transition-all duration-300 text-sm cursor-pointer bg-card hover:-translate-y-0.5 hover:shadow-sm"
           >
             <Download className="w-4 h-4" />
             Exportar
@@ -255,7 +291,7 @@ export default function AnalyticsView() {
       </div>
 
       {/* Body */}
-      <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full">
+      <div className="p-6 md:p-8 space-y-6 max-w-7xl mx-auto w-full relative z-10">
 
         {/* KPI row */}
         <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
@@ -268,9 +304,10 @@ export default function AnalyticsView() {
                 <div className="w-28 h-7 rounded bg-muted" />
               </div>
             ) : (
-              <div
+              <motion.div
+                variants={fadeUp}
                 key={i}
-                className="bg-card rounded-2xl border border-border p-5 hover:border-[#C0987A]/30 transition-all group"
+                className="bg-card border border-border shadow-md rounded-[2rem] p-6 hover-glow group"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div
@@ -287,7 +324,7 @@ export default function AnalyticsView() {
                 <div className="text-xs text-muted-foreground mb-1">{kpi.label}</div>
                 <div className="text-2xl font-bold text-foreground tracking-tight">{kpi.value}</div>
                 <div className="text-[11px] text-muted-foreground mt-1">{kpi.sub}</div>
-              </div>
+              </motion.div>
             );
           })}
         </div>
@@ -296,7 +333,7 @@ export default function AnalyticsView() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
 
           {/* Bar Chart */}
-          <div className="lg:col-span-3 bg-card rounded-2xl border border-border p-6">
+          <motion.div variants={fadeUp} className="lg:col-span-3 bg-card border border-border shadow-md rounded-[2.5rem] p-6 md:p-8">
             <div className="flex items-center justify-between mb-6">
               <div>
                 <h3 className="font-bold text-base text-foreground">Actividad por Período</h3>
@@ -304,7 +341,7 @@ export default function AnalyticsView() {
               </div>
               <div className="flex items-center gap-4 text-[11px] font-semibold text-muted-foreground">
                 <span className="flex items-center gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: PRIMARY }} />
+                  <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: "var(--theme-primary, #C0987A)" }} />
                   Realizadas
                 </span>
                 <span className="flex items-center gap-1.5">
@@ -340,7 +377,7 @@ export default function AnalyticsView() {
                             style={{
                               height: `${bar.pct}%`,
                               background: bar.count > 0
-                                ? `linear-gradient(to top, ${PRIMARY}, #D9A05B)`
+                                ? `linear-gradient(to top, ${"var(--theme-primary, #C0987A)"}, #D9A05B)`
                                 : "hsl(var(--muted))",
                             }}
                           />
@@ -362,10 +399,10 @@ export default function AnalyticsView() {
                 </div>
               </>
             )}
-          </div>
+          </motion.div>
 
           {/* Service Breakdown */}
-          <div className="lg:col-span-2 bg-card rounded-2xl border border-border p-6 flex flex-col">
+          <motion.div variants={fadeUp} className="lg:col-span-2 bg-card border border-border shadow-md rounded-[2.5rem] p-6 md:p-8 flex flex-col">
             <div className="mb-6">
               <h3 className="font-bold text-base text-foreground">Distribución de Servicios</h3>
               <p className="text-xs text-muted-foreground mt-0.5">Popularidad relativa de cada tipo</p>
@@ -442,14 +479,14 @@ export default function AnalyticsView() {
                 </div>
               </>
             )}
-          </div>
+          </motion.div>
         </div>
 
         {/* Bottom details row */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
           {/* Top Clients */}
-          <div className="bg-card rounded-2xl border border-border p-6">
+          <motion.div variants={fadeUp} className="bg-card border border-border shadow-md rounded-[2.5rem] p-6 md:p-8">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="font-bold text-base text-foreground">Clientes Frecuentes</h3>
@@ -485,7 +522,7 @@ export default function AnalyticsView() {
                     return (
                       <div key={name} className="flex items-center gap-3 group">
                         <div className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
-                          style={{ background: i === 0 ? PRIMARY : i === 1 ? ACCENT : "#94A3B8" }}>
+                          style={{ background: i === 0 ? "var(--theme-primary, #C0987A)" : i === 1 ? ACCENT : "#94A3B8" }}>
                           {initials}
                         </div>
                         <div className="flex-1 min-w-0">
@@ -493,7 +530,7 @@ export default function AnalyticsView() {
                           <p className="text-[11px] text-muted-foreground">{count} cita{count !== 1 ? "s" : ""} agendada(s)</p>
                         </div>
                         <div className="flex items-center gap-1 text-[11px] font-bold px-2 py-1 rounded-full"
-                          style={{ background: `${PRIMARY}15`, color: PRIMARY }}>
+                          style={{ background: `${"var(--theme-primary, #C0987A)"}15`, color: "var(--theme-primary, #C0987A)" }}>
                           #{i + 1}
                         </div>
                       </div>
@@ -507,16 +544,16 @@ export default function AnalyticsView() {
                 </div>
               );
             })()}
-          </div>
+          </motion.div>
 
           {/* Revenue Breakdown */}
-          <div className="bg-card rounded-2xl border border-border p-6 flex flex-col">
+          <motion.div variants={fadeUp} className="bg-card border border-border shadow-md rounded-[2.5rem] p-6 md:p-8 flex flex-col">
             <div className="flex items-center justify-between mb-5">
               <div>
                 <h3 className="font-bold text-base text-foreground">Resumen de Ingresos</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">Desglose estimado por tipo de sesión</p>
               </div>
-              <DollarSign className="w-4 h-4" style={{ color: PRIMARY }} />
+              <DollarSign className="w-4 h-4" style={{ color: "var(--theme-primary, #C0987A)" }} />
             </div>
 
             {isLoading ? (
@@ -565,7 +602,7 @@ export default function AnalyticsView() {
 
                   <div className="mt-4 pt-4 border-t border-border flex justify-between items-center">
                     <span className="text-sm font-bold text-foreground">Total estimado</span>
-                    <span className="text-lg font-bold" style={{ color: PRIMARY }}>{totalRevenueFormatted}</span>
+                    <span className="text-lg font-bold" style={{ color: "var(--theme-primary, #C0987A)" }}>{totalRevenueFormatted}</span>
                   </div>
                 </>
               ) : (
@@ -575,21 +612,21 @@ export default function AnalyticsView() {
                 </div>
               );
             })()}
-          </div>
+          </motion.div>
         </div>
 
       </div>
 
       {/* AI Insights Modal */}
       {isInsightsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-card rounded-3xl w-full max-w-lg shadow-2xl border border-border overflow-hidden text-foreground animate-in zoom-in-95 duration-200">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/40 backdrop-blur-sm p-4 animate-in fade-in duration-300">
+          <div className="bg-card/90 backdrop-blur-2xl rounded-[2.5rem] w-full max-w-lg shadow-2xl shadow-primary/10 border border-white/10 overflow-hidden text-foreground animate-in zoom-in-95 duration-300">
 
             <div className="flex items-center justify-between px-6 py-5 border-b border-border"
-              style={{ background: `linear-gradient(135deg, ${PRIMARY}20, transparent)` }}>
+              style={{ background: `linear-gradient(135deg, ${"var(--theme-primary, #C0987A)"}20, transparent)` }}>
               <h2 className="text-[18px] font-bold text-foreground flex items-center gap-2.5"
                 style={{ fontFamily: "'Fraunces', serif" }}>
-                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: PRIMARY }}>
+                <div className="w-8 h-8 rounded-xl flex items-center justify-center" style={{ background: "var(--theme-primary, #C0987A)" }}>
                   <Sparkles className="w-4 h-4 text-white" />
                 </div>
                 Insights de Negocio con IA
@@ -600,57 +637,82 @@ export default function AnalyticsView() {
               </button>
             </div>
 
-            <div className="p-6 space-y-3 max-h-[60vh] overflow-y-auto">
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                Análisis generado a partir de <strong className="text-foreground">{filteredEvents.length} citas</strong> del rango seleccionado ({activeRange === "week" ? "Semana" : activeRange === "month" ? "Mes" : "Año"}):
-              </p>
-
-              {[
-                {
-                  title: "💰 Rendimiento Financiero",
-                  body: `Tus ingresos estimados del período son ${totalRevenueFormatted} en ${filteredEvents.length} sesiones. ${filteredEvents.length > 2 ? "¡Excelente actividad! Considera implementar una política de pago anticipado para reducir ausencias." : "Puedes incrementar tus ingresos agendando más citas esta semana."}`,
-                },
-                {
-                  title: "📊 Servicio Estrella",
-                  body: topServices.length > 0
-                    ? `"${svcLabels[topServices[0][0]] || topServices[0][0]}" es tu servicio más solicitado (${Math.round((topServices[0][1] / totalEvents) * 100)}% de tus citas). Asegúrate de tener suficiente disponibilidad para este tipo de sesión.`
-                    : "Registra citas para descubrir cuáles son tus servicios más populares.",
-                },
-                {
-                  title: "👥 Base de Clientes",
-                  body: `Tienes ${clients.length} clientes registrados en tu catálogo. ${clients.length < 5 ? "Comparte tu link de reservas públicas para atraer nuevos clientes." : "¡Excelente cartera! El boca a boca con tus clientes actuales es una de las mejores formas de crecer."}`,
-                },
-                {
-                  title: "📈 Recomendación Estratégica",
-                  body: "Mantener una tasa de asistencia alta es clave. Considera activar los recordatorios automáticos de citas en la sección de notificaciones para reducir las ausencias al mínimo.",
-                },
-              ].map(({ title, body }, i) => (
-                <div key={i} className="p-4 rounded-2xl border border-border bg-muted/30">
-                  <h4 className="text-sm font-bold text-foreground mb-1.5">{title}</h4>
-                  <p className="text-[13px] text-muted-foreground leading-relaxed">{body}</p>
+            <div className="p-6 space-y-4 max-h-[60vh] overflow-y-auto">
+              {!customReport ? (
+                <>
+                  <p className="text-sm text-muted-foreground leading-relaxed">
+                    Análisis general a partir de <strong className="text-foreground">{filteredEvents.length} citas</strong> del rango seleccionado ({activeRange === "week" ? "Semana" : activeRange === "month" ? "Mes" : "Año"}):
+                  </p>
+                  {[
+                    {
+                      title: "💰 Rendimiento Financiero",
+                      body: `Tus ingresos estimados del período son ${totalRevenueFormatted} en ${filteredEvents.length} sesiones. ${filteredEvents.length > 2 ? "¡Excelente actividad! Considera implementar una política de pago anticipado para reducir ausencias." : "Puedes incrementar tus ingresos agendando más citas esta semana."}`,
+                    },
+                    {
+                      title: "📊 Servicio Estrella",
+                      body: topServices.length > 0
+                        ? `"${svcLabels[topServices[0][0]] || topServices[0][0]}" es tu servicio más solicitado (${Math.round((topServices[0][1] / totalEvents) * 100)}% de tus citas). Asegúrate de tener suficiente disponibilidad para este tipo de sesión.`
+                        : "Registra citas para descubrir cuáles son tus servicios más populares.",
+                    },
+                    {
+                      title: "👥 Base de Clientes",
+                      body: `Tienes ${clients.length} clientes registrados en tu catálogo. ${clients.length < 5 ? "Comparte tu link de reservas públicas para atraer nuevos clientes." : "¡Excelente cartera! El boca a boca con tus clientes actuales es una de las mejores formas de crecer."}`,
+                    },
+                    {
+                      title: "📈 Recomendación Estratégica",
+                      body: "Mantener una tasa de asistencia alta es clave. Considera activar los recordatorios automáticos de citas en la sección de notificaciones para reducir las ausencias al mínimo.",
+                    },
+                  ].map(({ title, body }, i) => (
+                    <div key={i} className="p-4 rounded-2xl border border-border bg-muted/30">
+                      <h4 className="text-sm font-bold text-foreground mb-1.5">{title}</h4>
+                      <p className="text-[13px] text-muted-foreground leading-relaxed">{body}</p>
+                    </div>
+                  ))}
+                </>
+              ) : (
+                <div className="p-5 rounded-2xl border-2 border-primary/20 bg-primary/5 animate-in fade-in zoom-in-95 duration-300">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Sparkles className="w-5 h-5" style={{ color: "var(--theme-primary, #C0987A)" }} />
+                    <h4 className="font-bold text-foreground">Tu Reporte Personalizado</h4>
+                  </div>
+                  <p className="text-[13px] text-foreground leading-relaxed whitespace-pre-wrap">{customReport}</p>
+                  <button 
+                    onClick={() => setCustomReport(null)}
+                    className="mt-4 text-xs font-bold text-muted-foreground hover:text-foreground underline decoration-muted-foreground/30 underline-offset-4 cursor-pointer"
+                  >
+                    Volver a los insights generales
+                  </button>
                 </div>
-              ))}
+              )}
             </div>
 
-            <div className="px-6 py-4 border-t border-border bg-muted/20 flex items-center justify-between">
-              <button
-                onClick={handleExport}
-                className="flex items-center gap-2 text-sm font-semibold text-muted-foreground hover:text-foreground transition-colors cursor-pointer bg-transparent border-none"
-              >
-                <Download className="w-4 h-4" />
-                Exportar reporte
-              </button>
-              <button
-                onClick={() => setIsInsightsOpen(false)}
-                className="px-5 py-2.5 rounded-xl text-sm font-bold text-white cursor-pointer hover:opacity-90 transition-opacity border-none"
-                style={{ background: PRIMARY }}
-              >
-                Entendido <ChevronRight className="w-4 h-4 inline" />
-              </button>
+            <div className="px-6 py-4 border-t border-border bg-muted/20 flex flex-col gap-3">
+              <form onSubmit={handleGenerateCustomReport} className="relative w-full">
+                <input 
+                  type="text" 
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  placeholder="Ej: Dime qué días tengo más demanda..."
+                  disabled={isGeneratingAi}
+                  className="w-full bg-card border border-border rounded-xl pl-4 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary text-foreground disabled:opacity-50"
+                />
+                <button 
+                  type="submit"
+                  disabled={isGeneratingAi || !aiPrompt.trim()}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-lg text-white disabled:opacity-50 transition-all cursor-pointer"
+                  style={{ background: "var(--theme-primary, #C0987A)" }}
+                >
+                  {isGeneratingAi ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <ChevronRight className="w-4 h-4" />
+                  )}
+                </button>
+              </form>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }

@@ -1,7 +1,7 @@
 import { X, User, Mail, Phone } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const PRIMARY = "#C0987A";
+
 
 interface CreateClientModalProps {
   isOpen: boolean;
@@ -37,9 +37,9 @@ export default function CreateClientModal({ isOpen, onClose, onSave, client }: C
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4 transition-all">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/40 backdrop-blur-sm p-4 transition-all">
       <div 
-        className="bg-card rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden border border-border animate-in fade-in zoom-in-95 duration-200"
+        className="bg-card/90 backdrop-blur-2xl rounded-[2.5rem] w-full max-w-lg shadow-2xl shadow-primary/10 overflow-hidden border border-white/20 animate-in fade-in zoom-in-95 duration-300"
         style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
       >
         <div className="flex items-center justify-between px-6 py-5 border-b border-border bg-muted/40">
@@ -67,7 +67,7 @@ export default function CreateClientModal({ isOpen, onClose, onSave, client }: C
                 placeholder="Ej. María García"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#C0987A] text-[14px] bg-muted/30 text-foreground placeholder-muted-foreground"
+                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary text-[14px] bg-muted/30 text-foreground placeholder-muted-foreground"
               />
             </div>
 
@@ -82,7 +82,7 @@ export default function CreateClientModal({ isOpen, onClose, onSave, client }: C
                 placeholder="maria.garcia@gmail.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#C0987A] text-[14px] bg-muted/30 text-foreground placeholder-muted-foreground"
+                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary text-[14px] bg-muted/30 text-foreground placeholder-muted-foreground"
               />
             </div>
 
@@ -96,7 +96,7 @@ export default function CreateClientModal({ isOpen, onClose, onSave, client }: C
                 placeholder="Ej. +56 9 1234 5678"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-[#C0987A] text-[14px] bg-muted/30 text-foreground placeholder-muted-foreground"
+                className="w-full px-4 py-3 rounded-xl border border-border focus:outline-none focus:ring-2 focus:ring-primary text-[14px] bg-muted/30 text-foreground placeholder-muted-foreground"
               />
             </div>
           </div>
@@ -113,7 +113,7 @@ export default function CreateClientModal({ isOpen, onClose, onSave, client }: C
               type="submit"
               disabled={!name || !email}
               className="px-5 py-2.5 rounded-xl text-[14px] font-bold text-white shadow-md hover:opacity-90 transition-all cursor-pointer disabled:opacity-50"
-              style={{ background: PRIMARY }}
+              style={{ background: "var(--theme-primary, #C0987A)" }}
             >
               {client ? "Guardar Cambios" : "Añadir Cliente"}
             </button>

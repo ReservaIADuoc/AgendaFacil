@@ -5,8 +5,10 @@ import { DayPicker } from "react-day-picker";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import "react-day-picker/dist/style.css";
+import { motion, AnimatePresence } from "framer-motion";
+import BackgroundBlobs from "../components/shared/BackgroundBlobs";
 
-const PRIMARY = "#C0987A";
+
 
 const DAYS_OF_WEEK_SPANISH = [
   { id: "MONDAY", label: "Lunes" },
@@ -71,7 +73,7 @@ export default function Onboarding() {
         value={value} 
         disabled={disabled}
         onChange={(e) => onChange(e.target.value)}
-        className="appearance-none bg-muted text-foreground font-bold px-4 py-2.5 rounded-xl outline-none focus:ring-2 focus:ring-[#C0987A] border border-border hover:border-muted-foreground/30 transition-all pr-10 cursor-pointer text-sm disabled:opacity-40"
+        className="appearance-none bg-muted/30 text-foreground font-bold px-5 py-3 rounded-2xl outline-none focus:ring-2 focus:ring-primary/40 border border-border/60 hover:border-border transition-all duration-300 pr-10 cursor-pointer text-sm disabled:opacity-40 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]"
       >
         {Array.from({ length: 24 }).map((_, h) => {
           const hourStr = h.toString().padStart(2, '0');
@@ -87,7 +89,9 @@ export default function Onboarding() {
   );
 
   return (
-    <div className="min-h-screen flex flex-col bg-background text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="min-h-screen flex flex-col bg-background text-foreground relative overflow-hidden" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <BackgroundBlobs />
+      
       {/* Header */}
       <header className="h-16 flex items-center justify-between px-6 border-b border-border bg-card">
         <span className="text-[17px] font-bold text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>Agenda Fácil</span>
@@ -96,15 +100,20 @@ export default function Onboarding() {
 
       {/* Main content */}
       <main className="flex-1 flex items-center justify-center p-4 sm:p-6">
-        <div className={`w-full ${step === 2 ? 'max-w-4xl' : 'max-w-2xl'} bg-card rounded-3xl p-8 md:p-12 shadow-xl border border-border transition-all duration-500`}>
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+          className={`w-full ${step === 2 ? 'max-w-4xl' : 'max-w-2xl'} glass-heavy rounded-[2.5rem] p-8 md:p-12 transition-all duration-700 relative z-10`}
+        >
 
           {/* Progress bar */}
           <div className="flex justify-between mb-12 relative max-w-xl mx-auto">
             <div className="absolute top-1/2 left-0 right-0 h-1 bg-muted -z-10 -translate-y-1/2"></div>
-            <div className="absolute top-1/2 left-0 h-1 bg-[#C0987A] -z-10 -translate-y-1/2 transition-all duration-500" style={{ width: `${((step - 1) / 2) * 100}%` }}></div>
+            <div className="absolute top-1/2 left-0 h-1 bg-primary -z-10 -translate-y-1/2 transition-all duration-500" style={{ width: `${((step - 1) / 2) * 100}%` }}></div>
 
             {[1, 2, 3].map(i => (
-              <div key={i} className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 shadow-sm ${step >= i ? 'bg-[#C0987A] text-white' : 'bg-muted text-muted-foreground'}`}>
+              <div key={i} className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 shadow-sm ${step >= i ? 'bg-primary text-white' : 'bg-muted text-muted-foreground'}`}>
                 {i === 1 ? <User className="w-4 h-4" /> : i === 2 ? <Clock className="w-4 h-4" /> : <BriefcaseMedical className="w-4 h-4" />}
               </div>
             ))}
@@ -112,15 +121,23 @@ export default function Onboarding() {
 
           {/* Steps */}
           <div className="min-h-[300px] flex flex-col">
+            <AnimatePresence mode="wait">
             {step === 1 && (
-              <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1 max-w-xl mx-auto w-full">
+              <motion.div 
+                key="step1"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.4 }}
+                className="flex-1 max-w-xl mx-auto w-full"
+              >
                 <h1 className="text-3xl font-bold mb-2 text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>Completa tu perfil</h1>
                 <p className="text-muted-foreground mb-8">Esta información será visible para tus pacientes.</p>
 
                 <div className="space-y-5">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">¿A qué te dedicas?</label>
-                    <select className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none">
+                    <select className="w-full px-5 py-3.5 rounded-2xl border border-border/60 bg-muted/30 text-foreground focus:ring-2 focus:ring-primary/40 outline-none transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] hover:border-border">
                       <option>Psicólogo/a</option>
                       <option>Coach</option>
                       <option>Nutricionista</option>
@@ -131,16 +148,23 @@ export default function Onboarding() {
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">Enlace personalizado</label>
                     <div className="flex">
-                      <span className="hidden sm:inline-flex items-center px-4 rounded-l-xl border border-r-0 border-border bg-muted text-muted-foreground text-sm">agendafacil.com/</span>
-                      <input type="text" className="flex-1 px-4 py-3 rounded-xl sm:rounded-l-none border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none" placeholder="tu-nombre" />
+                      <span className="hidden sm:inline-flex items-center px-5 rounded-l-2xl border border-r-0 border-border/60 bg-muted/50 text-muted-foreground text-sm">agendafacil.com/</span>
+                      <input type="text" className="flex-1 px-5 py-3.5 rounded-2xl sm:rounded-l-none border border-border/60 bg-muted/30 text-foreground focus:ring-2 focus:ring-primary/40 outline-none transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] hover:border-border" placeholder="tu-nombre" />
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {step === 2 && (
-              <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1 w-full">
+              <motion.div 
+                key="step2"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.4 }}
+                className="flex-1 w-full"
+              >
                 <div className="text-center mb-8">
                   <h1 className="text-3xl font-bold mb-2 text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>Define tu disponibilidad</h1>
                   <p className="text-muted-foreground">Configura tu horario de la semana o añade tus feriados y días libres.</p>
@@ -153,7 +177,7 @@ export default function Onboarding() {
                     onClick={() => setOnboardingTab("weekly")}
                     className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all ${
                       onboardingTab === "weekly"
-                        ? "border-[#C0987A] text-foreground"
+                        ? "border-primary text-foreground"
                         : "border-transparent text-muted-foreground hover:text-foreground"
                     }`}
                   >
@@ -164,7 +188,7 @@ export default function Onboarding() {
                     onClick={() => setOnboardingTab("holidays")}
                     className={`flex-1 pb-3 text-sm font-bold border-b-2 transition-all ${
                       onboardingTab === "holidays"
-                        ? "border-[#C0987A] text-foreground"
+                        ? "border-primary text-foreground"
                         : "border-transparent text-muted-foreground hover:text-foreground"
                     }`}
                   >
@@ -184,7 +208,7 @@ export default function Onboarding() {
                               type="checkbox"
                               checked={cfg.active}
                               onChange={() => handleWeeklyToggle(day.id)}
-                              className="w-5 h-5 text-[#C0987A] rounded border-border focus:ring-2 focus:ring-[#C0987A] outline-none accent-[#C0987A]" 
+                              className="w-5 h-5 text-primary rounded border-border focus:ring-2 focus:ring-primary outline-none accent-primary" 
                             />
                             <span className="font-bold text-foreground">{day.label}</span>
                           </label>
@@ -211,8 +235,8 @@ export default function Onboarding() {
                         onSelect={(dates) => setSelectedDates(dates || [])}
                         locale={es}
                         modifiersClassNames={{
-                          selected: "bg-[#C0987A] text-white hover:bg-[#C0987A] font-bold",
-                          today: "text-[#C0987A] font-bold"
+                          selected: "bg-primary text-white hover:bg-primary font-bold",
+                          today: "text-primary font-bold"
                         }}
                         styles={{
                           day: { borderRadius: '12px' },
@@ -226,7 +250,7 @@ export default function Onboarding() {
                       <div>
                         <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
                           <div className="w-10 h-10 rounded-xl bg-muted flex items-center justify-center">
-                            <CalendarDays className="w-5 h-5 text-[#C0987A]" />
+                            <CalendarDays className="w-5 h-5 text-primary" />
                           </div>
                           <div>
                             <h3 className="font-bold text-foreground">
@@ -243,14 +267,14 @@ export default function Onboarding() {
                                 type="checkbox" 
                                 checked={!isDatesWorkingDay}
                                 onChange={(e) => setIsDatesWorkingDay(!e.target.checked)}
-                                className="w-5 h-5 text-[#C0987A] rounded border-border focus:ring-2 focus:ring-[#C0987A] outline-none accent-[#C0987A]" 
+                                className="w-5 h-5 text-primary rounded border-border focus:ring-2 focus:ring-primary outline-none accent-primary" 
                               />
                               <span className="font-semibold text-foreground">Marcar como día libre / feriado</span>
                             </label>
 
                             {!isDatesWorkingDay ? (
                               <div className="bg-muted/50 p-6 rounded-2xl text-center border border-border">
-                                <span className="text-[#C0987A] font-semibold flex items-center justify-center gap-2">
+                                <span className="text-primary font-semibold flex items-center justify-center gap-2">
                                   <CheckCircle className="w-5 h-5" /> Estos días no tendrás disponibilidad
                                 </span>
                               </div>
@@ -292,18 +316,25 @@ export default function Onboarding() {
                     </div>
                   </div>
                 )}
-              </div>
+              </motion.div>
             )}
 
             {step === 3 && (
-              <div className="animate-in fade-in slide-in-from-right-4 duration-500 flex-1 max-w-xl mx-auto w-full">
+              <motion.div 
+                key="step3"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.4 }}
+                className="flex-1 max-w-xl mx-auto w-full"
+              >
                 <h1 className="text-3xl font-bold mb-2 text-foreground" style={{ fontFamily: "'Fraunces', serif" }}>Tu primer servicio</h1>
                 <p className="text-muted-foreground mb-8">Crea el servicio principal que ofreces a tus clientes.</p>
 
                 <div className="space-y-5">
                   <div>
                     <label className="block text-sm font-medium text-foreground mb-1">Nombre del servicio</label>
-                    <input type="text" className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none" placeholder="Ej. Consulta Inicial" defaultValue="Terapia Individual" />
+                    <input type="text" className="w-full px-5 py-3.5 rounded-2xl border border-border/60 bg-muted/30 text-foreground focus:ring-2 focus:ring-primary/40 outline-none transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] hover:border-border" placeholder="Ej. Consulta Inicial" defaultValue="Terapia Individual" />
                   </div>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <div className="flex-1">
@@ -311,7 +342,7 @@ export default function Onboarding() {
                       <div className="relative">
                         <select 
                           defaultValue="00:50" 
-                          className="w-full appearance-none bg-muted text-foreground font-bold px-5 py-3 rounded-xl outline-none focus:ring-2 focus:ring-[#C0987A] border border-border hover:border-muted-foreground/30 transition-all pr-10 cursor-pointer text-sm"
+                          className="w-full appearance-none bg-muted/30 text-foreground font-bold px-5 py-3.5 rounded-2xl outline-none focus:ring-2 focus:ring-primary/40 border border-border/60 hover:border-border transition-all duration-300 pr-10 cursor-pointer text-sm shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]"
                         >
                           <option value="00:15">00:15 (15 min)</option>
                           <option value="00:30">00:30 (30 min)</option>
@@ -336,12 +367,13 @@ export default function Onboarding() {
                     </div>
                     <div className="flex-1">
                       <label className="block text-sm font-medium text-foreground mb-1">Precio</label>
-                      <input type="text" className="w-full px-4 py-3 rounded-xl border border-border bg-card text-foreground focus:ring-2 focus:ring-[#C0987A] outline-none" placeholder="Ej. $50.000" />
+                      <input type="text" className="w-full px-5 py-3.5 rounded-2xl border border-border/60 bg-muted/30 text-foreground focus:ring-2 focus:ring-primary/40 outline-none transition-all duration-300 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)] hover:border-border" placeholder="Ej. $50.000" />
                     </div>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             )}
+            </AnimatePresence>
 
             {/* Navigation buttons */}
             <div className="mt-12 flex items-center justify-between pt-6 border-t border-border max-w-xl mx-auto w-full">
@@ -362,8 +394,7 @@ export default function Onboarding() {
               )}
               <button
                 onClick={handleNext}
-                className="px-6 sm:px-8 py-3 rounded-xl font-bold text-white shadow-md hover:opacity-90 transition-all flex items-center gap-2 cursor-pointer"
-                style={{ background: PRIMARY }}
+                className="px-6 sm:px-8 py-3 rounded-2xl font-bold text-white transition-all duration-500 flex items-center gap-2 cursor-pointer hover:-translate-y-1 bg-gradient-to-r from-primary to-primary/80 shadow-lg shadow-primary/30 hover:shadow-xl hover:shadow-primary/50"
               >
                 {step === 3 ? "Finalizar y entrar" : "Continuar"}
                 {step === 3 && <CheckCircle className="w-4 h-4" />}
@@ -371,7 +402,7 @@ export default function Onboarding() {
             </div>
           </div>
 
-        </div>
+        </motion.div>
       </main>
     </div>
   );
